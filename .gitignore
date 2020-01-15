@@ -103,7 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# Data files
+# Custom stuff.
 *.data
+*.json
 /.vs
 tooken.py
