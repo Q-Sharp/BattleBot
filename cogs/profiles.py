@@ -5,14 +5,40 @@ import random
 import datetime
 import asyncio
 import json
+import config
 
+def gainedRP(player, gained_rp):
+    if player['Level']['timeOfNextEarn'] > time.time():
+        return True, False, player['Level']['rank']
+    
+    rem_rp, rank = get_rank_from(player['Level']['rp'] + gained_rp)
 
+    if rank > player['Level']['rank']:
+        return False, True, rank
+
+    return False, False, rank
+
+# Function to get a user's rank and remaining rp to next rank.
+# Takes current rp as parameter
+def get_rank_from(rp):
+    # Sets the starting value to be our remaining rp
+    rem_rp = int(rp)
+    # Starts the rank at 0
+    rank = 0
+    # Loops throught the ranks and checks if the user had enough rp to rank up
+    # If so, take that rp away from rem_rp and add one to their rank
+    while rem_rp >= config.rp_ranks[rank]:
+        rem_rp -= config.rp_ranks[rank]
+        rank += 1
+    # Returns the final values for rank and rem_rp.
+    return rem_rp, rank
+
+    
 class Profiles(commands.Cog):
 
     # Initialises the variables and sets the bot.
     def __init__(self, bot):
         self.bot = bot
-        self.rp_mult = 1
 
     # Our base level command. Due to invoke_without_command=True it means that this command is only run when no
     # sub-command is run. Makes it a command group with a name.
@@ -107,7 +133,6 @@ class Profiles(commands.Cog):
                 break
             reaction = str(reaction)
             if reaction == '⏺️':
-                print(profiles)
                 playerID = random.choice(list(profiles))
                 while playerID == user.id:
                     playerID = random.choice(list(profiles))
@@ -185,7 +210,7 @@ class Profiles(commands.Cog):
             Change values on your profile. You can change:
             `name`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
             """
-            profiles = pickle.load(open('data/profiles.data', 'rb'))
+            profiles = json.load(open('data/profiles.json'))
             player = profiles[ctx.author.id]
             attribute = attribute.lower()
 
@@ -222,7 +247,7 @@ class Profiles(commands.Cog):
             await ctx.send("An Error occured. Please report this on the support server.")
         else: 
             await ctx.send("Profile updated.")
-            pickle.dump(profiles, open('data/profiles.data', 'wb'))
+            json.dump(profiles, open('data/profiles.json', 'w'))
 
 
     @profile.command(name='colour', aliases = ['color'])
@@ -230,7 +255,7 @@ class Profiles(commands.Cog):
         """
         Allows you to change the colour of all your profile based information!
         """
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
+        profiles = json.load(open('data/profiles.json'))
         try:
             player = profiles[ctx.author.id]
         except:
@@ -253,44 +278,65 @@ class Profiles(commands.Cog):
         player.colour = player.colours[colourList[colour]]
 
         profiles[ctx.author.id] = player
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
+        json.dump(profiles, open('data/profiles.json', 'w'))
         await ctx.send("Updated your colour.")
 
-##    @commands.Cog.listener()
-##    async def on_message(self, ctx):
-##        """
-##        Gives you rank points per message on a one minute cooldown.
-##        """
-##        if ctx.author.bot:
-##            return
-##        profiles = json.load(open('data/profiles.json', 'rb'))
-##        try:
-##            player = profiles[ctx.author.id]
-##        except KeyError:
-##            profiles[ctx.author.id] = PlayerPY.Player(ctx.author.display_name)
-##            player = profiles[ctx.author.id]
-##
-##        cooldown, rankedUp, rank = player.gainedRP()
-##        if cooldown:
-##            return
-##
-##        if rankedUp and player.rankUpMessage in ['any','dm']:
-##            if player.rankUpMessage == "any":
-##                destination = ctx.channel
-##            elif player.rankUpMessage == "dm":
-##                destination = ctx.author
-##            await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to rank {rank}!")
-##            if rank == 1:
-##                await destination.send("You've also unlocked a new colour: Rank 1!")
-##                player.addColour("Rank 1", 0xfefefe)
-##            elif rank == 5:
-##                await destination.send("You've also unlocked a new colour: Rank 5!")
-##                player.addColour("Rank 5", 0x7af8d3)
-##            elif rank == 10:
-##                await destination.send("You've also unlocked a new colour: Level 10!")
-##                player.addColour("Rank 10", 0x327c31)
-##
-##        pickle.dump(profiles, open('data/profiles.data', 'wb'))
+    @commands.Cog.listener()
+    async def on_message(self, ctx):
+        """
+        Gives you rank points per message on a one minute cooldown.
+        """
+
+        if ctx.author.bot:
+            return
+        profiles = json.load(open('data/profiles.json'))
+        try:
+            player = profiles[str(ctx.author.id)]
+        except KeyError:
+            profiles["{ctx.author.id}"] = {
+                "Base": {
+                    "username": f"{ctx.author.display_name}", "clanID": "None", "country": "Earth"},
+                "Level": {
+                    "rp": 0, "rank": 0, "timeOfNextEarn": 0},
+                "Achievements": {
+                    "lords": 0, "squires": 0, "rating": 1000},
+                "Favourites": {
+                    "unit": "Faceless Knights", "tactic": "FK-Hammer", "tome": "Enhance", "skin": "Shrub HT"},
+                "Settings": {
+                    "rankUpMessage": "any", "colour": "Default", "colours": {"Default": "000000"},"permissions": []}}
+
+            player = profiles[str(ctx.author.id)]
+
+        gained_rp = int(random.randint(config.rp_min, config.rp_max) * config.rp_mult)
+
+        cooldown, rankedUp, rank = gainedRP(player, gained_rp)
+        if cooldown:
+            return
+
+        player['Level']['rank'] = rank
+        player['Level']['timeOfNextEarn'] = time.time() + config.rp_cooldown
+        player['Level']['rp'] += gained_rp
+
+        
+        if rankedUp and player['Level']['rankUpMessage'] in ['any','dm']:
+            if player.rankUpMessage == "any":
+                destination = ctx.channel
+            elif player.rankUpMessage == "dm":
+                destination = ctx.author
+            await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to rank {rank}!")
+            if rank == 1:
+                await destination.send("You've also unlocked a new colour: Rank 1!")
+                player.addColour("Rank 1", 0xfefefe)
+            elif rank == 5:
+                await destination.send("You've also unlocked a new colour: Rank 5!")
+                player.addColour("Rank 5", 0x7af8d3)
+            elif rank == 10:
+                await destination.send("You've also unlocked a new colour: Level 10!")
+                player.addColour("Rank 10", 0x327c31)
+
+        print(profiles)
+
+        json.dump(profiles, open('data/profiles.json', 'w'))
 
 ##    @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
 ##    async def levelLB(self, ctx, member: discord.Member = None):
@@ -299,7 +345,7 @@ class Profiles(commands.Cog):
 ##        """
 ##        # Sort the dictionary into a list.
 ##        member = member or ctx.author
-##        profiles = pickle.load(open('data/profiles.data', 'rb'))
+##        profiles = json.load(open('data/profiles.json'))
 ##        rankings = []
 ##        description = ""
 ##        for profile in profiles:
@@ -357,7 +403,7 @@ class Profiles(commands.Cog):
 ##        """
 ##        # Sort the dictionary into a list.
 ##        member = member or ctx.author
-##        clans = pickle.load(open('data/clans.data', 'rb'))
+##        clans = json.load(open('data/clans.json'))
 ##        rankings = []
 ##        description = ""
 ##        for profile in clans[ctx.guild.id]['members']:
@@ -416,26 +462,8 @@ class Profiles(commands.Cog):
         Resets All rp. Used when testing rate of earn
         """
         profiles = {}
-        profiles[270190067354435584] = PlayerPY.Player("Greenfoot5")
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
+        json.dump(profiles, open('data/profiles.json', 'w'))
         await ctx.send("Reset all profiles.")
-
-    @commands.is_owner()
-    @profile.command(name = 'fix', hidden = True)
-    async def fixData(self, ctx):
-        """
-        Custom command to repair or fix the data.
-        """
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
-        for profileID in profiles:
-            if 'Rank 1' in profiles[profileID].colours:
-                profiles[profileID].colours['Rank 1'] = 0xfefefe
-        print(profiles)
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
-        await ctx.send("Fixed Data.")
-
-    
-        
 
 def setup(bot):
     bot.add_cog(Profiles(bot))
