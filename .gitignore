@@ -107,4 +107,4 @@ venv.bak/
 *.data
 *.json
 /.vs
-tooken.py
+*tooken.py
