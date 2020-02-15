@@ -1,0 +1,33 @@
+{
+    "270190067354435584": {
+        "Base": {
+            "username": "Greenfoot5",
+            "clanID": "#bb1",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 50,
+            "rank": 0
+        },
+        "Achievements": {
+            "lords": 5,
+            "squires": 13,
+            "rating": 2556
+        },
+        "Favourites": {
+            "unit": "Faceless Knights",
+            "tactic": "FK-Hammer",
+            "tome": "Enhance",
+            "skin": "Shrub HT"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": [
+            ]
+        }
+    }
+}

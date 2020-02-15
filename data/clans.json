@@ -1,0 +1,43 @@
+{
+    "#bb1": {
+        "Base": {
+            "name": "Example Clan",
+            "tag": "EC",
+            "location": "International",
+            "description": "We're an example clan!",
+            "icon": "https://cdn.discordapp.com/embed/avatars/4.png"
+        },
+        "Info": {
+            "mascot": "<:shields:576819372006309958>",
+            "creationTime": 1581786015.9377851,
+            "advertise": "Come join Example Clan! We're awesome!",
+            "colour": "000000"
+        },
+        "Level": {
+            "xp": 20,
+            "level": 0,
+            "Earners": {
+                "270190067354435584": 20
+            }
+        },
+        "Members": {
+            "leaderID": 270190067354435584,
+            "coLeaderIDs": [
+            ],
+            "elderIDs": [
+            ],
+            "memberIDs": [
+            ],
+            "commanderIDs": [
+                270190067354435584
+            ]
+        },
+        "Joins": {
+            "type": "Open",
+            "reqRating": 1200,
+            "reqRank": 4
+        }
+    }
+}
+            
+        
