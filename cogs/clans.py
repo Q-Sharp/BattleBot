@@ -1,13 +1,10 @@
 import discord
 from discord.ext import commands
 import asyncio
-import pickle
+import json
 import time
 import random
 import cogs.checks as check
-
-#Custom classes
-import classes.clan as ClanPY
 
 
 #ranksRP = formula = [int(50*(i**1.5)+100*i+300) for i in range(50)]
@@ -27,13 +24,14 @@ class Clans(commands.Cog):
         """
         Displays info based on your clan stats.
         """
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
+        profiles = json.load(open('data/profiles.json'))
+        clans = json.load(open('data/clans.json'))
         if clanName is None:
-            clanName = profiles[ctx.author.id].clan
+            clanName = profiles[str(ctx.author.id)]["Base"]["clanID"]
             if clanName is None:
                 await ctx.send("You aren't in a clan!")
                 return
-        clans = pickle.load(open('data/clans.data', 'rb'))
+        clans = json.load(open('data/clans.json'))
         try:
             clan = clans[clanName]
         except KeyError:
@@ -213,8 +211,8 @@ class Clans(commands.Cog):
         if name is None:
             await ctx.send("Please specify a clan name.")
             return
-        clans = pickle.load(open('data/clans.data', 'rb'))
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
+        clans = json.load(open('data/clans.json'))
+        profiles = json.load(open('data/profiles.json'))
         try:
             clan = clans[name]
             await ctx.send("A clan already exists with that name! Pick something else.")
@@ -223,20 +221,19 @@ class Clans(commands.Cog):
             if profiles[ctx.author.id].clan is not None:
                 await ctx.send("You're already in a clan! Leave that first!")
                 return
-            clans[f'{name}'] = ClanPY.Clan(name, ctx.author.id)
-            profiles[ctx.author.id].clan = name
+            profiles[str(ctx.author.id)].clan = name
         
         await ctx.send("Clan created. Congratulations on becoming a High Constable! Use `b!clan edit` to setup your clan!")
 
-        pickle.dump(clans, open('data/clans.data', 'wb'))
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
+        json.dump(clans, open('data/clans.json', 'w'))
+        json.dump(profiles, open('data/profiles.json', 'w'))
 
     @clan.command(name='join')
     async def joinClan(self, ctx, *, clanName:str = None):
         # TODO - Check against invites
         # TODO - Ask for password using wait_for
-        clans = pickle.load(open('data/clans.data', 'rb'))
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
+        clans = json.load(open('data/clans.json'))
+        profiles = json.load(open('data/profiles.json'))
         try:
             clan = clans[clanName]
         except KeyError:
@@ -256,8 +253,8 @@ class Clans(commands.Cog):
             return
         
         await ctx.send(f"You have joined {clanName}.")
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
-        pickle.dump(clans, open('data/profiles.data','wb'))
+        json.dump(profiles, open('data/profiles.data', 'wb'))
+        json.dump(clans, open('data/profiles.data','wb'))
 
     @clan.command(name='edit')
     async def editClan(self, ctx):
@@ -284,22 +281,22 @@ class Clans(commands.Cog):
         Resets all clan RP.
         """
         clans = {}
-        pickle.dump(clans,open('data/clans.data','wb'))
+        json.dump(clans,open('data/clans.json','w'))
         await ctx.send("Clans reset.")
 
     @commands.is_owner()
     @clan.command(name='fix', hidden = True)
     async def fixClans(self, ctx):
-        clans = pickle.load(open('data/clans.data', 'rb'))
+        clans = json.load(open('data/clans.json'))
         clans = {}
-        pickle.dump(clans, open('data/clans.data', 'wb'))
+        json.dump(clans, open('data/clans.json', 'w'))
         
     @commands.is_owner()
     @commands.command(name='servers', hidden = True)
     async def clans(self, ctx):
         await ctx.send(f"I am in {len(self.bot.guilds)} servers.")
         print(self.bot.guilds)
-        print(pickle.load(open('data/clans.data', 'rb'))["BB"].highConstable)
+        print(json.load(open('data/clans.json'))["BB"].highConstable)
 
 def setup(bot):
     bot.add_cog(Clans(bot))
