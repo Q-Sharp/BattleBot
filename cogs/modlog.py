@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
-import pickle
+import json
 import cogs.checks as check
 
 class ModLog(commands.Cog):
@@ -13,9 +13,9 @@ class ModLog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self,message):
-        clans = pickle.load(open('data/clans.data','rb'))
+        servers = json.load(open('data/servers.json'))
         try:
-            if clans[message.guild.id]['options']['modlog']['channel'] == None:
+            if servers[str(message.guild.id)]['Modlog']['channel'] == None:
                 return
         except KeyError:
             return
@@ -36,15 +36,15 @@ class ModLog(commands.Cog):
             message.content = message.content[:1020] + "..."
         embed.add_field(name="Content",
                         value=message.content)
-        channel = message.guild.get_channel(clans[message.guild.id]['options']['modlog']['channel'])
+        channel = message.guild.get_channel(servers[str(message.guild.id)]['Modlog']['channel'])
         await channel.send(content="",embed=embed)
 
     @commands.Cog.listener()
     async def on_message_edit(self,before,after):
         #Checks modlogs are enabled.
-        clans = pickle.load(open('data/clans.data','rb'))
+        servers = json.load(open('data/servers.json'))
         try:
-            if clans[after.guild.id]['options']['modlog']['channel'] == None:
+            if servers[str(after.guild.id)]['Modlog']['channel'] == None:
                 return
         except KeyError:
             return
@@ -76,7 +76,7 @@ class ModLog(commands.Cog):
                             value=after.content)
             embed.add_field(name="Jump",
                             value=after.jump_url)
-            channel = after.guild.get_channel(clans[after.guild.id]['options']['modlog']['channel'])
+            channel = after.guild.get_channel(servers[str(after.guild.id)]['Modlog']['channel'])
             await channel.send(content="",embed=embed)
 
         #Message Pinned
@@ -100,7 +100,7 @@ class ModLog(commands.Cog):
                             value=after.content)
             embed.add_field(name="Pinned",
                             value=after.pinned)
-            channel = after.guild.get_channel(clans[after.guild.id]['options']['modlog']['channel'])
+            channel = after.guild.get_channel(servers[str(after.guild.id)]['Modlog']['channel'])
             await channel.send(content="",embed=embed)
 
 def setup(bot):
