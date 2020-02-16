@@ -211,71 +211,75 @@ class Profiles(commands.Cog):
             `name`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
             """
             profiles = json.load(open('data/profiles.json'))
-            player = profiles[ctx.author.id]
+            player = profiles[str(ctx.author.id)]
             attribute = attribute.lower()
 
             if attribute in ["lords", "lord"]:
                 if str(value)[0] == "+":
-                    player.lords += int(value)
+                    player['Achievements']['lords'] += int(value)
                 else:
-                    player.lords = int(value)
+                    player['Achievements']['lords'] = int(value)
             elif attribute in ["squires", "squire"]:
                 if str(value)[0] == "+":
-                    player.squires += int(value) 
+                    player['Achievements']['squires'] += int(value) 
                 else:
-                    player.squires = int(value)
+                    player['Achievements']['squires'] = int(value)
             elif attribute in ["rating"]:
-                player.rating = int(value)
+                player['Achievements']['rating'] = int(value)
             elif attribute in ["unit", "units", "troop"]:
-                player.favourites['unit'] = value
+                player['Favourites']['unit'] = value
             elif attribute in ["tactic", "strategy", "layout"]:
-                player.favourites['tactic'] = value
+                player['Favourites']['tactic'] = value
             elif attribute in ["tome", "masteryskill", "book"]:
-                player.favourites['tome'] = value
+                player['Favourites']['tome'] = value
             elif attribute in ["skin", "look"]:
-                player.favourites['skin'] = value
+                player['Favourites']['skin'] = value
             elif attribute in ["country", "location"]:
-                player.country = value
+                player['Base']['country'] = value
             elif attribute in ["name", "accountname", "account"]:
-                player.accountName = value
+                player['Base']['Username'] = value
             else:
                 await ctx.send("This is not a valid setting. Check your profile for valid settings.")
                 return
         except ValueError:
             await ctx.send("Invalid Value. Please choose a number.")
-        except:
-            await ctx.send("An Error occured. Please report this on the support server.")
         else: 
             await ctx.send("Profile updated.")
             json.dump(profiles, open('data/profiles.json', 'w'))
 
 
-    @profile.command(name='colour', aliases = ['color'])
+    @profile.command(name='colour', aliases = ['color', 'colours', 'colors'])
     async def changeProfileColour(self, ctx, colour:int = None):
         """
         Allows you to change the colour of all your profile based information!
         """
         profiles = json.load(open('data/profiles.json'))
         try:
-            player = profiles[ctx.author.id]
+            player = profiles[str(ctx.author.id)]
         except:
             await ctx.send("An error occured. Please try again.")
             return
-        colourList = list(player.colours)
+        colourList = list(player['Settings']['colours'])
 
-        if colour is None or colour >= len(player.colours) or colour < 0:
+        if colour is None or colour >= len(colourList) or colour < 0:
             description = "Unlocked Colours:"
             for colourIndex in range(len(colourList)):
-                description = description + f"\n{colourIndex}. {colourList[colourIndex]}"
+                description = description + f"\n{colourIndex}. {colourList[colourIndex]} - `#{player['Settings']['colours'][colourList[colourIndex]]}`" 
             embed = discord.Embed(title = "Please select a valid colour.",
-                                  colour = player.colour,
+                                  colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                   description = description)
+
+            Color = str(colourList.index(player['Settings']['colour'])) + ". " + player['Settings']['colour'] + " - `#" + player['Settings']['colours'][f"{player['Settings']['colour']}"] + "`"
+            embed.add_field(name = "Current Colour:",
+                            value = Color)
+
             embed.set_footer(text = f"Requested by {ctx.author.display_name}",
                              icon_url = ctx.author.avatar_url_as(static_format='png'))
             await ctx.send(embed=embed)
             return
 
-        player.colour = player.colours[colourList[colour]]
+        print(colourList)
+        player['Settings']['colour'] = colourList[colour]
 
         profiles[ctx.author.id] = player
         json.dump(profiles, open('data/profiles.json', 'w'))
@@ -318,83 +322,81 @@ class Profiles(commands.Cog):
         player['Level']['rp'] += gained_rp
 
         
-        if rankedUp and player['Level']['rankUpMessage'] in ['any','dm']:
-            if player.rankUpMessage == "any":
+        if rankedUp and player['Settings']['rankUpMessage'] in ['any','dm']:
+            if player['Settings']['rankUpMessage'] == "any":
                 destination = ctx.channel
-            elif player.rankUpMessage == "dm":
+            elif player['Settings']['rankUpMessage'] == "dm":
                 destination = ctx.author
             await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to rank {rank}!")
             if rank == 1:
                 await destination.send("You've also unlocked a new colour: Rank 1!")
-                player.addColour("Rank 1", 0xfefefe)
+                player['Settings']['colours']['Rank 1'] = "fefefe"
             elif rank == 5:
                 await destination.send("You've also unlocked a new colour: Rank 5!")
-                player.addColour("Rank 5", 0x7af8d3)
+                player['Settings']['colours']['Rank 5'] = "7af8d3"
             elif rank == 10:
                 await destination.send("You've also unlocked a new colour: Level 10!")
-                player.addColour("Rank 10", 0x327c31)
-
-        print(profiles)
+                player['Settings']['colours']['Rank 10'] = "327c31"
 
         json.dump(profiles, open('data/profiles.json', 'w'))
 
-##    @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
-##    async def levelLB(self, ctx, member: discord.Member = None):
-##        """
-##        Check where people are relative to each other! Not specifying a page will select the first page.
-##        """
-##        # Sort the dictionary into a list.
-##        member = member or ctx.author
-##        profiles = json.load(open('data/profiles.json'))
-##        rankings = []
-##        description = ""
-##        for profile in profiles:
-##            try:
-##                rankings.append({'id': profile, 'rp': profiles[profile]['rp']})
-##            except KeyError:
-##                pass
-##
-##        def getKey(item):
-##            return item['rp']
-##
-##        rankings = sorted(rankings, reverse = True, key = getKey)
-##
-##        # Add the top 5
-##        end = 5
-##        if len(rankings) < 5:
-##            end = len(rankings)
-##        for i in range(end):
-##            user = await ctx.bot.fetch_user(rankings[i]['id'])
-##            description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
-##
-##        # Add member
-##        index = -1
-##        for i in range(len(rankings)):
-##            if rankings[i]['id'] == member.id:
-##                index = i
-##        if index <= 4:
-##            embed = discord.Embed(title="Global rank point leaderboard",
-##                                  colour=discord.Colour(0xa72693),
-##                                  description=description,
-##                                  inline=True)
-##            embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                             icon_url=ctx.author.avatar_url_as(static_format="png"))
-##            await ctx.send(content="Here you go!", embed=embed)
-##            return
-##        description += "--==ME==--"
-##        for i in [index - 1, index, index + 1]:
-##            if i != len(rankings):
-##                user = await ctx.bot.fetch_user(rankings[i]['id'])
-##                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points."
-##
-##        embed = discord.Embed(title="Rank leaderboard",
-##                              colour=discord.Colour(0xa72693),
-##                              description=description,
-##                              inline=True)
-##        embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                         icon_url=ctx.author.avatar_url_as(static_format="png"))
-##        # Send embed
-##        await ctx.send(content="Here you go!", embed=embed)
+    # @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
+    # async def levelLB(self, ctx, member: discord.Member = None):
+    #     """
+    #     Check where people are relative to each other! Not specifying a page will select the first page.
+    #     """
+    #     # Sort the dictionary into a list.
+    #     member = member or ctx.author
+    #     profiles = json.load(open('data/profiles.json'))
+    #     rankings = []
+    #     description = ""
+    #     for player in profiles:
+    #         try:
+    #             rankings.append({'id': player, 'rp': player[profile]['Level']['rp']})
+    #         except KeyError:
+    #             pass
+
+    #     def getKey(item):
+    #        return item['Level']['rp']
+
+    #     rankings = sorted(rankings, reverse = True, key = getKey)
+
+    #     # Add the top 5
+    #     end = 5
+    #     if len(rankings) < 5:
+    #         end = len(rankings)
+    #     for i in range(end):
+    #         user = await ctx.bot.fetch_user(rankings[i]['id'])
+    #         description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
+
+    #     # Add member
+    #     index = -1
+    #     for i in range(len(rankings)):
+    #         if rankings[i]['id'] == member.id:
+    #             index = i
+    #     if index <= 4:
+    #         embed = discord.Embed(title="Global rank point leaderboard",
+    #                               colour=discord.Colour(0xa72693),
+    #                               description=description,
+    #                               inline=True)
+    #         embed.set_footer(text=f"Requested by {ctx.author.display_name}",
+    #                          icon_url=ctx.author.avatar_url_as(static_format="png"))
+    #         await ctx.send(content="Here you go!", embed=embed)
+    #         return
+    #     description += "--==ME==--"
+    #     for i in [index - 1, index, index + 1]:
+    #         if i != len(rankings):
+    #             user = await ctx.bot.fetch_user(rankings[i]['id'])
+    #             description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['Level']['rp']} rank points."
+
+    #     embed = discord.Embed(title="Rank leaderboard",
+    #                           colour=discord.Colour(0xa72693),
+    #                           description=description,
+    #                           inline=True)
+    #     embed.set_footer(text=f"Requested by {ctx.author.display_name}",
+    #                      icon_url=ctx.author.avatar_url_as(static_format="png"))
+    #     # Send embed
+    #     await ctx.send(content="Here you go!", embed=embed)
 ##
 ##    @levelLB.command(name="here")
 ##    async def levelLBHere(self, ctx, member: discord.Member = None):
