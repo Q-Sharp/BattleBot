@@ -340,122 +340,63 @@ class Profiles(commands.Cog):
 
         json.dump(profiles, open('data/profiles.json', 'w'))
 
-    # @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
-    # async def levelLB(self, ctx, member: discord.Member = None):
-    #     """
-    #     Check where people are relative to each other! Not specifying a page will select the first page.
-    #     """
-    #     # Sort the dictionary into a list.
-    #     member = member or ctx.author
-    #     profiles = json.load(open('data/profiles.json'))
-    #     rankings = []
-    #     description = ""
-    #     for player in profiles:
-    #         try:
-    #             rankings.append({'id': player, 'rp': player[profile]['Level']['rp']})
-    #         except KeyError:
-    #             pass
+    @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
+    async def levelLB(self, ctx, member: discord.Member = None):
+        """
+        Check where people are relative to each other! Not specifying a page will select the first page.
+        """
+        # Sort the dictionary into a list.
+        member = member or ctx.author
+        profiles = json.load(open('data/profiles.json'))
+        rankings = []
+        description = ""
+        for player in profiles:
+            try:
+                rankings.append({'id': player, 'rp': profiles[player]['Level']['rp']})
+            except KeyError:
+                pass
 
-    #     def getKey(item):
-    #        return item['Level']['rp']
+        def getKey(item):
+           return item['rp']
 
-    #     rankings = sorted(rankings, reverse = True, key = getKey)
+        rankings = sorted(rankings, reverse = True, key = getKey)
 
-    #     # Add the top 5
-    #     end = 5
-    #     if len(rankings) < 5:
-    #         end = len(rankings)
-    #     for i in range(end):
-    #         user = await ctx.bot.fetch_user(rankings[i]['id'])
-    #         description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
+        # Add the top 5
+        end = 5
+        if len(rankings) < 5:
+            end = len(rankings)
+        for i in range(end):
+            user = await ctx.bot.fetch_user(rankings[i]['id'])
+            description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
 
-    #     # Add member
-    #     index = -1
-    #     for i in range(len(rankings)):
-    #         if rankings[i]['id'] == member.id:
-    #             index = i
-    #     if index <= 4:
-    #         embed = discord.Embed(title="Global rank point leaderboard",
-    #                               colour=discord.Colour(0xa72693),
-    #                               description=description,
-    #                               inline=True)
-    #         embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-    #                          icon_url=ctx.author.avatar_url_as(static_format="png"))
-    #         await ctx.send(content="Here you go!", embed=embed)
-    #         return
-    #     description += "--==ME==--"
-    #     for i in [index - 1, index, index + 1]:
-    #         if i != len(rankings):
-    #             user = await ctx.bot.fetch_user(rankings[i]['id'])
-    #             description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['Level']['rp']} rank points."
+        # Add member
+        index = -1
+        for i in range(len(rankings)):
+            if rankings[i]['id'] == member.id:
+                index = i
+        if index <= 4:
+            embed = discord.Embed(title="Global rank point leaderboard",
+                                  colour=discord.Colour(0xa72693),
+                                  description=description,
+                                  inline=True)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}",
+                             icon_url=ctx.author.avatar_url_as(static_format="png"))
+            await ctx.send(content="Here you go!", embed=embed)
+            return
+        description += "--==ME==--"
+        for i in [index - 1, index, index + 1]:
+            if i != len(rankings):
+                user = await ctx.bot.fetch_user(rankings[i]['id'])
+                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['Level']['rp']} rank points."
 
-    #     embed = discord.Embed(title="Rank leaderboard",
-    #                           colour=discord.Colour(0xa72693),
-    #                           description=description,
-    #                           inline=True)
-    #     embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-    #                      icon_url=ctx.author.avatar_url_as(static_format="png"))
-    #     # Send embed
-    #     await ctx.send(content="Here you go!", embed=embed)
-##
-##    @levelLB.command(name="here")
-##    async def levelLBHere(self, ctx, member: discord.Member = None):
-##        """
-##        Check where people are relative to each other! Not specifing a page will select the first page.
-##        """
-##        # Sort the dictionary into a list.
-##        member = member or ctx.author
-##        clans = json.load(open('data/clans.json'))
-##        rankings = []
-##        description = ""
-##        for profile in clans[ctx.guild.id]['members']:
-##            try:
-##                rankings.append({'id': profile, 'rp': clans[ctx.guild.id]['members'][profile]['rp']})
-##            except KeyError:
-##                pass
-##
-##        def getKey(item):
-##            return item['rp']
-##
-##        rankings = sorted(rankings, reverse = True, key = getKey)
-##
-##        # Add the top 5
-##        end = 5
-##        if len(rankings) < 5:
-##            end = len(rankings)
-##        for i in range(end):
-##            user = ctx.bot.get_user(rankings[i]['id'])
-##            description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
-##
-##        # Add member
-##        index = -1
-##        for i in range(len(rankings)):
-##            if rankings[i]['id'] == member.id:
-##                index = i
-##        if index <= 4:
-##            embed = discord.Embed(title=f"{ctx.guild.name} rank point leaderboard",
-##                                  colour=discord.Colour(0x009975),
-##                                  description=description,
-##                                  inline=True)
-##            embed.set_thumbnail(url=ctx.guild.icon_url_as(static_format='png'))
-##            embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                             icon_url=ctx.author.avatar_url_as(static_format="png"))
-##            await ctx.send(content="Here you go!", embed=embed)
-##            return
-##        description += "--==ME==--"
-##        for i in [index - 1, index, index + 1]:
-##            if i != len(rankings):
-##                user = ctx.bot.get_user(rankings[i]['id'])
-##                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points."
-##
-##        embed = discord.Embed(title="Rank leaderboard",
-##                              colour=discord.Colour(0x009975),
-##                              description=description,
-##                              inline=True)
-##        embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                         icon_url=ctx.author.avatar_url_as(static_format="png"))
-##        # Send embed
-##        await ctx.send(content="Here you go!", embed = embed)
+        embed = discord.Embed(title="Rank leaderboard",
+                              colour=discord.Colour(0xa72693),
+                              description=description,
+                              inline=True)
+        embed.set_footer(text=f"Requested by {ctx.author.display_name}",
+                         icon_url=ctx.author.avatar_url_as(static_format="png"))
+        # Send embed
+        await ctx.send(content="Here you go!", embed=embed)
 
     @commands.is_owner()
     @profile.command(name = 'reset', hidden = True)
