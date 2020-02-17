@@ -225,8 +225,8 @@ class Clans(commands.Cog):
         
         await ctx.send("Clan created. Congratulations on becoming a High Constable! Use `b!clan edit` to setup your clan!")
 
-        json.dump(clans, open('data/clans.json', 'w'))
-        json.dump(profiles, open('data/profiles.json', 'w'))
+        json.dump(clans, open('data/clans.json', 'w'), indent = 4)
+        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
 
     @clan.command(name='join')
     async def joinClan(self, ctx, *, clanName:str = None):
@@ -253,8 +253,8 @@ class Clans(commands.Cog):
             return
         
         await ctx.send(f"You have joined {clanName}.")
-        json.dump(profiles, open('data/profiles.data', 'wb'))
-        json.dump(clans, open('data/profiles.data','wb'))
+        json.dump(profiles, open('data/profiles.data', 'wb'), indent = 4)
+        json.dump(clans, open('data/profiles.data','wb'), indent = 4)
 
     @clan.command(name='edit')
     async def editClan(self, ctx):
@@ -281,7 +281,7 @@ class Clans(commands.Cog):
         Resets all clan RP.
         """
         clans = {}
-        json.dump(clans,open('data/clans.json','w'))
+        json.dump(clans,open('data/clans.json','w'), indent = 4)
         await ctx.send("Clans reset.")
 
     @commands.is_owner()
@@ -289,7 +289,7 @@ class Clans(commands.Cog):
     async def fixClans(self, ctx):
         clans = json.load(open('data/clans.json'))
         clans = {}
-        json.dump(clans, open('data/clans.json', 'w'))
+        json.dump(clans, open('data/clans.json', 'w'), indent = 4)
         
     @commands.is_owner()
     @commands.command(name='servers', hidden = True)

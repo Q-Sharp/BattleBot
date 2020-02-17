@@ -6,8 +6,9 @@
             "country": "Earth"
         },
         "Level": {
-            "rp": 50,
-            "rank": 0
+            "rp": 72,
+            "rank": 0,
+            "timeOfNextEarn": 1581969486.1843915
         },
         "Achievements": {
             "lords": 5,
@@ -26,8 +27,7 @@
             "colours": {
                 "Default": "000000"
             },
-            "permissions": [
-            ]
+            "permissions": []
         }
     }
 }

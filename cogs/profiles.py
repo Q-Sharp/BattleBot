@@ -71,8 +71,12 @@ class Profiles(commands.Cog):
         page1.set_footer(text = f"Requested by {ctx.author.display_name}",
                          icon_url = ctx.author.avatar_url_as(static_format='png'))
 
+        try:
+            clan = clans[player['Base']['clanID']]['Base']['name']
+        except KeyError:
+            clan = "None"
         page1.add_field(name = "Base Info",
-                        value = f"Account Name: {player['Base']['username']} \nClan: {clans[player['Base']['clanID']]['Base']['name']} \nCountry: {player['Base']['country']}",
+                        value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
                         inline = False)
         page1.add_field(name = "Level Info",
                         value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
@@ -245,7 +249,7 @@ class Profiles(commands.Cog):
             await ctx.send("Invalid Value. Please choose a number.")
         else: 
             await ctx.send("Profile updated.")
-            json.dump(profiles, open('data/profiles.json', 'w'))
+            json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
 
 
     @profile.command(name='colour', aliases = ['color', 'colours', 'colors'])
@@ -282,7 +286,7 @@ class Profiles(commands.Cog):
         player['Settings']['colour'] = colourList[colour]
 
         profiles[ctx.author.id] = player
-        json.dump(profiles, open('data/profiles.json', 'w'))
+        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
         await ctx.send("Updated your colour.")
 
     @commands.Cog.listener()
@@ -294,10 +298,11 @@ class Profiles(commands.Cog):
         if ctx.author.bot:
             return
         profiles = json.load(open('data/profiles.json'))
+        
         try:
             player = profiles[str(ctx.author.id)]
         except KeyError:
-            profiles["{ctx.author.id}"] = {
+            profiles[f"{ctx.author.id}"] = {
                 "Base": {
                     "username": f"{ctx.author.display_name}", "clanID": "None", "country": "Earth"},
                 "Level": {
@@ -338,7 +343,7 @@ class Profiles(commands.Cog):
                 await destination.send("You've also unlocked a new colour: Level 10!")
                 player['Settings']['colours']['Rank 10'] = "327c31"
 
-        json.dump(profiles, open('data/profiles.json', 'w'))
+        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
 
     @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
     async def levelLB(self, ctx, member: discord.Member = None):
@@ -405,7 +410,7 @@ class Profiles(commands.Cog):
         Resets All rp. Used when testing rate of earn
         """
         profiles = {}
-        json.dump(profiles, open('data/profiles.json', 'w'))
+        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
         await ctx.send("Reset all profiles.")
 
 def setup(bot):
