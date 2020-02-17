@@ -312,7 +312,7 @@ class Profiles(commands.Cog):
                 "Achievements": {
                     "lords": 0, "squires": 0, "rating": 1000},
                 "Favourites": {
-                    "unit": "Faceless Knights", "tactic": "FK-Hammer", "tome": "Enhance", "skin": "Shrub HT"},
+                    "unit": "None", "tactic": "None", "tome": "None", "skin": "None"},
                 "Settings": {
                     "rankUpMessage": "any", "colour": "Default", "colours": {"Default": "000000"},"permissions": []}}
 
