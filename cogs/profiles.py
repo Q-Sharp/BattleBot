@@ -1,19 +1,44 @@
 import discord
 from discord.ext import commands
-import pickle
 import time
 import random
-import classes.player as PlayerPY
 import datetime
 import asyncio
+import json
+import config
 
+def gainedRP(player, gained_rp):
+    if player['Level']['timeOfNextEarn'] > time.time():
+        return True, False, player['Level']['rank']
+    
+    rem_rp, rank = get_rank_from(player['Level']['rp'] + gained_rp)
 
+    if rank > player['Level']['rank']:
+        return False, True, rank
+
+    return False, False, rank
+
+# Function to get a user's rank and remaining rp to next rank.
+# Takes current rp as parameter
+def get_rank_from(rp):
+    # Sets the starting value to be our remaining rp
+    rem_rp = int(rp)
+    # Starts the rank at 0
+    rank = 0
+    # Loops throught the ranks and checks if the user had enough rp to rank up
+    # If so, take that rp away from rem_rp and add one to their rank
+    while rem_rp >= config.rp_ranks[rank]:
+        rem_rp -= config.rp_ranks[rank]
+        rank += 1
+    # Returns the final values for rank and rem_rp.
+    return rem_rp, rank
+
+    
 class Profiles(commands.Cog):
 
     # Initialises the variables and sets the bot.
     def __init__(self, bot):
         self.bot = bot
-        self.rp_mult = 1
 
     # Our base level command. Due to invoke_without_command=True it means that this command is only run when no
     # sub-command is run. Makes it a command group with a name.
@@ -27,9 +52,9 @@ class Profiles(commands.Cog):
         if userName is None:
             userName = ctx.author.name
         user = discord.utils.find(lambda u: u.name.startswith(userName), self.bot.users)
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
+        profiles = json.load(open('data/profiles.json'))
         try:
-            player = profiles[user.id]
+            player = profiles[str(user.id)]
         except KeyError:
             await ctx.send("That person doesn't have a profile yet. Get them to send a message and I'll make one!")
             return
@@ -37,19 +62,24 @@ class Profiles(commands.Cog):
             await ctx.send("I don't know that Discord User.")
             return
 
+        clans = json.load(open('data/clans.json'))
         # Base Info
         page1 = discord.Embed(title = f"{user.display_name}'s profile",
-                              colour = player.colour,
+                              colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                               description = f"{user.name}#{user.discriminator}")
         page1.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
         page1.set_footer(text = f"Requested by {ctx.author.display_name}",
                          icon_url = ctx.author.avatar_url_as(static_format='png'))
 
+        try:
+            clan = clans[player['Base']['clanID']]['Base']['name']
+        except KeyError:
+            clan = "None"
         page1.add_field(name = "Base Info",
-                        value = f"Account Name: {player.accountName} \nClan: {player.clan} \nCountry: {player.country}",
+                        value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
                         inline = False)
         page1.add_field(name = "Level Info",
-                        value = f"Rank: {player.rank} \nTotal Rank Points: {player.rp}",
+                        value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
                         inline = False)
 
         message = await ctx.send(embed=page1)
@@ -63,22 +93,22 @@ class Profiles(commands.Cog):
 
         # Add Page 2
         page2 = discord.Embed(title = f"{user.display_name}'s profile",
-                              colour = player.colour,
+                              colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                               description = f"{user.name}#{user.discriminator}")
         page2.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
         page2.set_footer(text = f"Requested by {ctx.author.display_name}",
                          icon_url = ctx.author.avatar_url_as(static_format='png'))
 
         page2.add_field(name = "Achievements",
-                        value = f"Amount of Lord titles: {player.lords} \nAmount of Squire titles: {player.squires} \nBest :trophy: rating: {player.rating}",
+                        value = f"Amount of Lord titles: {player['Achievements']['lords']} \nAmount of Squire titles: {player['Achievements']['squires']} \nBest :trophy: rating: {player['Achievements']['rating']}",
                         inline=False)
         page2.add_field(name = "Fun Favourites",
-                        value=f"Favourite unit: {player.favourites['unit']} \nFavourite Tactic: {player.favourites['tactic']} \nFavourite Tome: {player.favourites['tome']} \nFavourite Skin: {player.favourites['skin']}",
+                        value=f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
                         inline=False)
 
         # Add Page 3
         page3 = discord.Embed(title = f"{user.display_name}'s profile",
-                              colour = player.colour,
+                              colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                               description = f"{user.name}#{user.discriminator}")
         page3.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
         page3.set_footer(text = f"Requested by {ctx.author.display_name}",
@@ -107,7 +137,6 @@ class Profiles(commands.Cog):
                 break
             reaction = str(reaction)
             if reaction == '⏺️':
-                print(profiles)
                 playerID = random.choice(list(profiles))
                 while playerID == user.id:
                     playerID = random.choice(list(profiles))
@@ -183,77 +212,83 @@ class Profiles(commands.Cog):
         try:
             """
             Change values on your profile. You can change:
-            `name`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
+            `username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
             """
-            profiles = pickle.load(open('data/profiles.data', 'rb'))
-            player = profiles[ctx.author.id]
+            profiles = json.load(open('data/profiles.json'))
+            player = profiles[str(ctx.author.id)]
             attribute = attribute.lower()
 
             if attribute in ["lords", "lord"]:
                 if str(value)[0] == "+":
-                    player.lords += int(value)
+                    player['Achievements']['lords'] += int(value)
                 else:
-                    player.lords = int(value)
+                    player['Achievements']['lords'] = int(value)
+            elif attribute in ["clans" "clan"]:
+                player["Base"]["clan"] = value
             elif attribute in ["squires", "squire"]:
                 if str(value)[0] == "+":
-                    player.squires += int(value) 
+                    player['Achievements']['squires'] += int(value) 
                 else:
-                    player.squires = int(value)
+                    player['Achievements']['squires'] = int(value)
             elif attribute in ["rating"]:
-                player.rating = int(value)
+                player['Achievements']['rating'] = int(value)
             elif attribute in ["unit", "units", "troop"]:
-                player.favourites['unit'] = value
+                player['Favourites']['unit'] = value
             elif attribute in ["tactic", "strategy", "layout"]:
-                player.favourites['tactic'] = value
+                player['Favourites']['tactic'] = value
             elif attribute in ["tome", "masteryskill", "book"]:
-                player.favourites['tome'] = value
+                player['Favourites']['tome'] = value
             elif attribute in ["skin", "look"]:
-                player.favourites['skin'] = value
+                player['Favourites']['skin'] = value
             elif attribute in ["country", "location"]:
-                player.country = value
-            elif attribute in ["name", "accountname", "account"]:
-                player.accountName = value
+                player['Base']['country'] = value
+            elif attribute in ["name", "accountname", "account", "username"]:
+                player['Base']['Username'] = value
             else:
                 await ctx.send("This is not a valid setting. Check your profile for valid settings.")
                 return
         except ValueError:
             await ctx.send("Invalid Value. Please choose a number.")
-        except:
-            await ctx.send("An Error occured. Please report this on the support server.")
         else: 
             await ctx.send("Profile updated.")
-            pickle.dump(profiles, open('data/profiles.data', 'wb'))
+            json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
 
 
-    @profile.command(name='colour', aliases = ['color'])
+    @profile.command(name='colour', aliases = ['color', 'colours', 'colors'])
     async def changeProfileColour(self, ctx, colour:int = None):
         """
         Allows you to change the colour of all your profile based information!
         """
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
+        profiles = json.load(open('data/profiles.json'))
         try:
-            player = profiles[ctx.author.id]
+            player = profiles[str(ctx.author.id)]
         except:
             await ctx.send("An error occured. Please try again.")
             return
-        colourList = list(player.colours)
+        colourList = list(player['Settings']['colours'])
 
-        if colour is None or colour >= len(player.colours) or colour < 0:
+        if colour is None or colour >= len(colourList) or colour < 0:
             description = "Unlocked Colours:"
             for colourIndex in range(len(colourList)):
-                description = description + f"\n{colourIndex}. {colourList[colourIndex]}"
+                description = description + f"\n{colourIndex}. {colourList[colourIndex]} - `#{player['Settings']['colours'][colourList[colourIndex]]}`" 
             embed = discord.Embed(title = "Please select a valid colour.",
-                                  colour = player.colour,
+                                  colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                   description = description)
+
+            Color = str(colourList.index(player['Settings']['colour'])) + ". " + player['Settings']['colour'] + " - `#" + player['Settings']['colours'][f"{player['Settings']['colour']}"] + "`"
+            embed.add_field(name = "Current Colour:",
+                            value = Color)
+
             embed.set_footer(text = f"Requested by {ctx.author.display_name}",
                              icon_url = ctx.author.avatar_url_as(static_format='png'))
             await ctx.send(embed=embed)
             return
 
-        player.colour = player.colours[colourList[colour]]
+        print(colourList)
+        player['Settings']['colour'] = colourList[colour]
 
         profiles[ctx.author.id] = player
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
+        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
         await ctx.send("Updated your colour.")
 
     @commands.Cog.listener()
@@ -261,153 +296,114 @@ class Profiles(commands.Cog):
         """
         Gives you rank points per message on a one minute cooldown.
         """
+
         if ctx.author.bot:
             return
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
-        try:
-            player = profiles[ctx.author.id]
-        except KeyError:
-            profiles[ctx.author.id] = PlayerPY.Player(ctx.author.display_name)
-            player = profiles[ctx.author.id]
+        profiles = json.load(open('data/profiles.json'))
 
-        cooldown, rankedUp, rank = player.gainedRP()
+        try:
+            player = profiles[str(ctx.author.id)]
+        except KeyError:
+            profiles[f"{ctx.author.id}"] = {
+                "Base": {
+                    "username": f"{ctx.author.display_name}", "clanID": "None", "country": "Earth"},
+                "Level": {
+                    "rp": 0, "rank": 0, "timeOfNextEarn": 0},
+                "Achievements": {
+                    "lords": 0, "squires": 0, "rating": 1000},
+                "Favourites": {
+                    "unit": "Faceless Knights", "tactic": "FK-Hammer", "tome": "Enhance", "skin": "Shrub HT"},
+                "Settings": {
+                    "rankUpMessage": "any", "colour": "Default", "colours": {"Default": "000000"},"permissions": []}}
+
+            player = profiles[str(ctx.author.id)]
+
+        gained_rp = int(random.randint(config.rp_min, config.rp_max) * config.rp_mult)
+
+        cooldown, rankedUp, rank = gainedRP(player, gained_rp)
         if cooldown:
             return
 
-        if rankedUp and player.rankUpMessage in ['any','dm']:
-            if player.rankUpMessage == "any":
+        player['Level']['rank'] = rank
+        player['Level']['timeOfNextEarn'] = time.time() + config.rp_cooldown
+        player['Level']['rp'] += gained_rp
+
+        
+        if rankedUp and player['Settings']['rankUpMessage'] in ['any','dm']:
+            if player['Settings']['rankUpMessage'] == "any":
                 destination = ctx.channel
-            elif player.rankUpMessage == "dm":
+            elif player['Settings']['rankUpMessage'] == "dm":
                 destination = ctx.author
             await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to rank {rank}!")
             if rank == 1:
                 await destination.send("You've also unlocked a new colour: Rank 1!")
-                player.addColour("Rank 1", 0xfefefe)
+                player['Settings']['colours']['Rank 1'] = "fefefe"
             elif rank == 5:
                 await destination.send("You've also unlocked a new colour: Rank 5!")
-                player.addColour("Rank 5", 0x7af8d3)
+                player['Settings']['colours']['Rank 5'] = "7af8d3"
             elif rank == 10:
                 await destination.send("You've also unlocked a new colour: Level 10!")
-                player.addColour("Rank 10", 0x327c31)
+                player['Settings']['colours']['Rank 10'] = "327c31"
 
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
+        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
 
-##    @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
-##    async def levelLB(self, ctx, member: discord.Member = None):
-##        """
-##        Check where people are relative to each other! Not specifying a page will select the first page.
-##        """
-##        # Sort the dictionary into a list.
-##        member = member or ctx.author
-##        profiles = pickle.load(open('data/profiles.data', 'rb'))
-##        rankings = []
-##        description = ""
-##        for profile in profiles:
-##            try:
-##                rankings.append({'id': profile, 'rp': profiles[profile]['rp']})
-##            except KeyError:
-##                pass
-##
-##        def getKey(item):
-##            return item['rp']
-##
-##        rankings = sorted(rankings, reverse = True, key = getKey)
-##
-##        # Add the top 5
-##        end = 5
-##        if len(rankings) < 5:
-##            end = len(rankings)
-##        for i in range(end):
-##            user = await ctx.bot.fetch_user(rankings[i]['id'])
-##            description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
-##
-##        # Add member
-##        index = -1
-##        for i in range(len(rankings)):
-##            if rankings[i]['id'] == member.id:
-##                index = i
-##        if index <= 4:
-##            embed = discord.Embed(title="Global rank point leaderboard",
-##                                  colour=discord.Colour(0xa72693),
-##                                  description=description,
-##                                  inline=True)
-##            embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                             icon_url=ctx.author.avatar_url_as(static_format="png"))
-##            await ctx.send(content="Here you go!", embed=embed)
-##            return
-##        description += "--==ME==--"
-##        for i in [index - 1, index, index + 1]:
-##            if i != len(rankings):
-##                user = await ctx.bot.fetch_user(rankings[i]['id'])
-##                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points."
-##
-##        embed = discord.Embed(title="Rank leaderboard",
-##                              colour=discord.Colour(0xa72693),
-##                              description=description,
-##                              inline=True)
-##        embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                         icon_url=ctx.author.avatar_url_as(static_format="png"))
-##        # Send embed
-##        await ctx.send(content="Here you go!", embed=embed)
-##
-##    @levelLB.command(name="here")
-##    async def levelLBHere(self, ctx, member: discord.Member = None):
-##        """
-##        Check where people are relative to each other! Not specifing a page will select the first page.
-##        """
-##        # Sort the dictionary into a list.
-##        member = member or ctx.author
-##        clans = pickle.load(open('data/clans.data', 'rb'))
-##        rankings = []
-##        description = ""
-##        for profile in clans[ctx.guild.id]['members']:
-##            try:
-##                rankings.append({'id': profile, 'rp': clans[ctx.guild.id]['members'][profile]['rp']})
-##            except KeyError:
-##                pass
-##
-##        def getKey(item):
-##            return item['rp']
-##
-##        rankings = sorted(rankings, reverse = True, key = getKey)
-##
-##        # Add the top 5
-##        end = 5
-##        if len(rankings) < 5:
-##            end = len(rankings)
-##        for i in range(end):
-##            user = ctx.bot.get_user(rankings[i]['id'])
-##            description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
-##
-##        # Add member
-##        index = -1
-##        for i in range(len(rankings)):
-##            if rankings[i]['id'] == member.id:
-##                index = i
-##        if index <= 4:
-##            embed = discord.Embed(title=f"{ctx.guild.name} rank point leaderboard",
-##                                  colour=discord.Colour(0x009975),
-##                                  description=description,
-##                                  inline=True)
-##            embed.set_thumbnail(url=ctx.guild.icon_url_as(static_format='png'))
-##            embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                             icon_url=ctx.author.avatar_url_as(static_format="png"))
-##            await ctx.send(content="Here you go!", embed=embed)
-##            return
-##        description += "--==ME==--"
-##        for i in [index - 1, index, index + 1]:
-##            if i != len(rankings):
-##                user = ctx.bot.get_user(rankings[i]['id'])
-##                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points."
-##
-##        embed = discord.Embed(title="Rank leaderboard",
-##                              colour=discord.Colour(0x009975),
-##                              description=description,
-##                              inline=True)
-##        embed.set_footer(text=f"Requested by {ctx.author.display_name}",
-##                         icon_url=ctx.author.avatar_url_as(static_format="png"))
-##        # Send embed
-##        await ctx.send(content="Here you go!", embed = embed)
+    @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
+    async def levelLB(self, ctx, member: discord.Member = None):
+        """
+        Check where people are relative to each other! Not specifying a page will select the first page.
+        """
+        # Sort the dictionary into a list.
+        member = member or ctx.author
+        profiles = json.load(open('data/profiles.json'))
+        rankings = []
+        description = ""
+        for player in profiles:
+            try:
+                rankings.append({'id': player, 'rp': profiles[player]['Level']['rp']})
+            except KeyError:
+                pass
+
+        def getKey(item):
+           return item['rp']
+
+        rankings = sorted(rankings, reverse = True, key = getKey)
+
+        # Add the top 5
+        end = 5
+        if len(rankings) < 5:
+            end = len(rankings)
+        for i in range(end):
+            user = await ctx.bot.fetch_user(rankings[i]['id'])
+            description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
+
+        # Add member
+        index = -1
+        for i in range(len(rankings)):
+            if rankings[i]['id'] == member.id:
+                index = i
+        if index <= 4:
+            embed = discord.Embed(title="Global rank point leaderboard",
+                                  colour=discord.Colour(0xa72693),
+                                  description=description,
+                                  inline=True)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}",
+                             icon_url=ctx.author.avatar_url_as(static_format="png"))
+            await ctx.send(content="Here you go!", embed=embed)
+            return
+        description += "--==ME==--"
+        for i in [index - 1, index, index + 1]:
+            if i != len(rankings):
+                user = await ctx.bot.fetch_user(rankings[i]['id'])
+                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['Level']['rp']} rank points."
+
+        embed = discord.Embed(title="Rank leaderboard",
+                              colour=discord.Colour(0xa72693),
+                              description=description,
+                              inline=True)
+        embed.set_footer(text=f"Requested by {ctx.author.display_name}",
+                         icon_url=ctx.author.avatar_url_as(static_format="png"))
+        # Send embed
+        await ctx.send(content="Here you go!", embed=embed)
 
     @commands.is_owner()
     @profile.command(name = 'reset', hidden = True)
@@ -416,26 +412,8 @@ class Profiles(commands.Cog):
         Resets All rp. Used when testing rate of earn
         """
         profiles = {}
-        profiles[270190067354435584] = PlayerPY.Player("Greenfoot5")
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
+        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
         await ctx.send("Reset all profiles.")
-
-    @commands.is_owner()
-    @profile.command(name = 'fix', hidden = True)
-    async def fixData(self, ctx):
-        """
-        Custom command to repair or fix the data.
-        """
-        profiles = pickle.load(open('data/profiles.data', 'rb'))
-        for profileID in profiles:
-            if 'Rank 1' in profiles[profileID].colours:
-                profiles[profileID].colours['Rank 1'] = 0xfefefe
-        print(profiles)
-        pickle.dump(profiles, open('data/profiles.data', 'wb'))
-        await ctx.send("Fixed Data.")
-
-    
-        
 
 def setup(bot):
     bot.add_cog(Profiles(bot))

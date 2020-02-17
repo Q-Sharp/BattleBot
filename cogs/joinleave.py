@@ -2,8 +2,8 @@
 import discord
 from discord.ext import commands
 import asyncio
-# Allows us to load and store binary data
-import pickle
+# Allows us to load and store json data
+import json
 # Allows us to randomise things
 import random
 # Allows us to manipulate time
@@ -23,29 +23,29 @@ class JoinLeaveMessages(commands.Cog):
     # Parameters as per d.py
     async def on_member_join(self,member):
         # Gets the clan data
-        clans = pickle.load(open('data/clans.data','rb'))
+        servers = json.load(open('data/clans.json'))
         
         # Find the channel id
         try:
-            channel = clans[member.guild.id]['options']['messages']['joinChannel']
+            channel = servers[str(member.guild.id)]['Messages']['joinChannel']
         # If it can't find a channel, don't do anything
         except KeyError:
             return
 
         # Makes sure the server has at least one message
-        if len(clans[member.guild.id]['options']['messages']['join']) <= 0:
+        if len(servers[str(member.guild.id)]['Messages']['joinMessages']) <= 0:
             return
         # Selects a random join message
-        joinName, joinMessage = random.choice(list(clans[member.guild.id]['options']['messages']['join'].items()))
+        joinName, joinMessage = random.choice(list(servers[str(member.guild.id)]['Messages']['joinMessages'].items()))
 
         # Formats the joinMessage with the placeholders
-        joinMessage = joinMessage.replace("{member_name}",f"{member.name}#{member.discriminator}")
+        joinMessage = joinMessage.replace("{join.name}",f"{member.name}#{member.discriminator}")
         try:
-            joinMessage = joinMessage.replace("{member_mention}",f"{member.mention}")
+            joinMessage = joinMessage.replace("{join.mention}",f"{member.mention}")
         except KeyError:
             pass
         try:
-            joinMessage = joinMessage.replace("{created}",f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)") # Turns datetime to time to make it easier to deal with.
+            joinMessage = joinMessage.replace("{join.creationDate}",f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)") # Turns datetime to time to make it easier to deal with.
         except KeyError:
             pass
         # Creates a join position
@@ -60,7 +60,7 @@ class JoinLeaveMessages(commands.Cog):
                 return item
             join_dates = sorted(join_dates,reverse=False,key=get_key)
             # Set's the join message (by finding the index of the user's join date from the sorted list)
-            joinMessage = joinMessage.replace("{position}",f"{join_dates.index(member.joined_at)+1}")
+            joinMessage = joinMessage.replace("{join.position}",f"{join_dates.index(member.joined_at)+1}")
         except KeyError:
             pass
 
@@ -79,26 +79,30 @@ class JoinLeaveMessages(commands.Cog):
     # Parameters as per d.py
     async def on_member_leave(self,member):
         # Gets the clan data
-        clans = pickle.load(open('data/clans.data','rb'))
+        servers = json.load(open('data/clans.json'))
         
         # Find the channel id
         try:
-            channel = clans[member.guild.id]['options']['messages']['leaveChannel']
+            channel = servers[str(member.guild.id)]['Messages']['leaveChannel']
         except KeyError:
             return
         
         # Selects a random leave message
-        if len(clans[member.guild.id]['options']['messages']['leave']) <= 0:
+        if len(servers[str(member.guild.id)]['Messages']['leaveMessages']) <= 0:
             return
-        leaveName, leaveMessage = random.choice(list(clans[member.guild.id]['options']['messages']['leave'].items()))
+        leaveName, leaveMessage = random.choice(list(servers[str(member.guild.id)]['Messages']['leaveMessages'].items()))
 
         # Formats the leaveMessage with the placeholders
         try:
-            leaveMessage = leaveMessage.replace("{member_name}",f"{member.name}#{member.discriminator}")
+            leaveMessage = leaveMessage.replace("{leave.name}", f"{member.name}#{member.discriminator}")
         except KeyError:
             pass
         try:
-            leaveMessage = leaveMessage.replace("{created}",f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)")
+            leaveMessage = leaveMessage.replace("{leave.creationDate}", f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)")
+        except KeyError:
+            pass
+        try:
+            leaveMessage = leaveMessage.replace("{leave.joinDate}", f"{member.joined_at.ctime()} ({int(int(time.time() - (member.joined_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)")
         except KeyError:
             pass
         # Creates a join position
@@ -108,8 +112,8 @@ class JoinLeaveMessages(commands.Cog):
                 join_dates.append(user.joined_at)
             def get_key(item):
                 return item
-            join_dates = sorted(leave_dates,reverse=False,key=get_key)
-            leaveMessage = leaveMessage.replace("{position}",f"{join_dates.index(member.joined_at)+1}")
+            join_dates = sorted(join_dates,reverse=False,key=get_key)
+            leaveMessage = leaveMessage.replace("{leave.position}", f"{join_dates.index(member.joined_at)+1}")
         except KeyError:
             pass
 

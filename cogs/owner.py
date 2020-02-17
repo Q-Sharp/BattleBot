@@ -4,7 +4,7 @@ from asyncio.subprocess import PIPE, STDOUT
 import discord
 from discord.ext import commands
 
-import pickle
+import json
 
 class Owner(commands.Cog):
     """
@@ -141,7 +141,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def LenProfiles(self,ctx):
         "Lists the amount of people who have a profile. aka the people who have spoken when the bot can see their messages."
-        await ctx.send(len(pickle.load(open('data/profiles.data','rb'))))
+        await ctx.send(len(json.load(open('data/profiles.json'))))
 
 def setup(bot):
     bot.add_cog(Owner(bot))
