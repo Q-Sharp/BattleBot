@@ -212,7 +212,7 @@ class Profiles(commands.Cog):
         try:
             """
             Change values on your profile. You can change:
-            `name`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
+            `username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
             """
             profiles = json.load(open('data/profiles.json'))
             player = profiles[str(ctx.author.id)]
@@ -223,6 +223,8 @@ class Profiles(commands.Cog):
                     player['Achievements']['lords'] += int(value)
                 else:
                     player['Achievements']['lords'] = int(value)
+            elif attribute in ["clans" "clan"]:
+                player["Base"]["clan"] = value
             elif attribute in ["squires", "squire"]:
                 if str(value)[0] == "+":
                     player['Achievements']['squires'] += int(value) 
@@ -240,7 +242,7 @@ class Profiles(commands.Cog):
                 player['Favourites']['skin'] = value
             elif attribute in ["country", "location"]:
                 player['Base']['country'] = value
-            elif attribute in ["name", "accountname", "account"]:
+            elif attribute in ["name", "accountname", "account", "username"]:
                 player['Base']['Username'] = value
             else:
                 await ctx.send("This is not a valid setting. Check your profile for valid settings.")
@@ -298,7 +300,7 @@ class Profiles(commands.Cog):
         if ctx.author.bot:
             return
         profiles = json.load(open('data/profiles.json'))
-        
+
         try:
             player = profiles[str(ctx.author.id)]
         except KeyError:
