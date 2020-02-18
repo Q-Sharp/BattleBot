@@ -33,8 +33,8 @@ class Options(commands.Cog):
         """
         Use to check the current setting of any option.
         """
-        clans = data_handler.Load("clans")
-        profiles = data_handler.Load("profiles")
+        clans = data_handler.load("clans")
+        profiles = data_handler.load("profiles")
         if option == 'modlog':
             await ctx.send("Gotta work on some UI and check so there won't be any errors. Bear with me.")
         else:
@@ -61,7 +61,7 @@ class Options(commands.Cog):
         """
         Sets the modlog to a certain channel or disables it. User must have manage channels permissions.
         """
-        clans = data_handler.Load("clans")
+        clans = data_handler.load("clans")
         if channel != None:
             try:
                 options = clans[ctx.guild.id]['options']
@@ -94,7 +94,7 @@ class Options(commands.Cog):
         """
         Setting for per-user rankup messages. They can also be disabled per server as well.
         """
-        profiles = data_handler.Load("profiles")
+        profiles = data_handler.load("profiles")
         settings = ['any','dm','disabled']
         if setting not in settings:
             setting = None
@@ -125,7 +125,7 @@ class Options(commands.Cog):
         Sets rankup messages for the server.
         Requires the manage_channels permission
         """
-        clans = data_handler.Load("clans")
+        clans = data_handler.load("clans")
         settings = ['any','channel','disabled','dm']
         if setting not in settings:
             setting = None
@@ -206,7 +206,7 @@ class Options(commands.Cog):
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = data_handler.Load("clans")
+        clans = data_handler.load("clans")
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:
@@ -414,7 +414,7 @@ Mentioning channels and users will also work but they won't change for each mess
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = data_handler.Load("clans")
+        clans = data_handler.load("clans")
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:

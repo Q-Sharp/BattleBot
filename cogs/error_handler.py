@@ -157,9 +157,9 @@ class CommandErrorHandler(commands.Cog):
         if member is None:
             await ctx.send("Please specify a member")
             return
-        banned_users = data_handler.Load("bannedusers")
+        banned_users = data_handler.load("bannedusers")
         banned_users.append(member.id)
-        data_handler.Dump(banned_users, "bannedusers")
+        data_handler.dump(banned_users, "bannedusers")
 
     @commands.is_owner()
     @commands.command(name="bot-pardon")
@@ -167,15 +167,15 @@ class CommandErrorHandler(commands.Cog):
         if member is None:
             await ctx.send("Please specify a member")
             return
-        banned_users = data_handler.Load("bannedusers")
+        banned_users = data_handler.load("bannedusers")
         banned_users.remove(member.id)
-        data_handler.Dump(banned_users, "bannedusers")
+        data_handler.dump(banned_users, "bannedusers")
 
     @commands.is_owner()
     @commands.command(name="reset-bans")
     async def resetBotBans(self, ctx):
         banned_users = []
-        data_handler.Dump(banned_users, "bannedusers")
+        data_handler.dump(banned_users, "bannedusers")
 
 def setup(bot):
     bot.add_cog(CommandErrorHandler(bot))

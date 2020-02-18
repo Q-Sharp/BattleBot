@@ -14,7 +14,7 @@ class ModLog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self,message):
-        servers = data_handler.Load("servers")
+        servers = data_handler.load("servers")
         try:
             if servers[str(message.guild.id)]['Modlog']['channel'] == None:
                 return
@@ -43,7 +43,7 @@ class ModLog(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self,before,after):
         #Checks modlogs are enabled.
-        servers = data_handler.Load("servers")
+        servers = data_handler.load("servers")
         try:
             if servers[str(after.guild.id)]['Modlog']['channel'] == None:
                 return

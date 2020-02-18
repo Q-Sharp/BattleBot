@@ -53,7 +53,7 @@ class Profiles(commands.Cog):
         if userName is None:
             userName = ctx.author.name
         user = discord.utils.find(lambda u: u.name.startswith(userName), self.bot.users)
-        profiles = data_handler.Load("profiles")
+        profiles = data_handler.load("profiles")
         try:
             player = profiles[str(user.id)]
         except KeyError:
@@ -63,7 +63,7 @@ class Profiles(commands.Cog):
             await ctx.send("I don't know that Discord User.")
             return
 
-        clans = data_handler.Load("clans")
+        clans = data_handler.load("clans")
         # Base Info
         page1 = discord.Embed(title = f"{user.display_name}'s profile",
                               colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
@@ -215,7 +215,7 @@ class Profiles(commands.Cog):
             Change values on your profile. You can change:
             `username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
             """
-            profiles = data_handler.Load("profiles")
+            profiles = data_handler.load("profiles")
             player = profiles[str(ctx.author.id)]
             attribute = attribute.lower()
 
@@ -252,7 +252,7 @@ class Profiles(commands.Cog):
             await ctx.send("Invalid Value. Please choose a number.")
         else: 
             await ctx.send("Profile updated.")
-            data_handler.Dump(profiles, "profiles")
+            data_handler.dump(profiles, "profiles")
 
 
     @profile.command(name='colour', aliases = ['color', 'colours', 'colors'])
@@ -260,7 +260,7 @@ class Profiles(commands.Cog):
         """
         Allows you to change the colour of all your profile based information!
         """
-        profiles = data_handler.Load("profiles")
+        profiles = data_handler.load("profiles")
         try:
             player = profiles[str(ctx.author.id)]
         except:
@@ -289,7 +289,7 @@ class Profiles(commands.Cog):
         player['Settings']['colour'] = colourList[colour]
 
         profiles[ctx.author.id] = player
-        data_handler.Dump(profiles, "profiles")
+        data_handler.dump(profiles, "profiles")
         await ctx.send("Updated your colour.")
 
     @commands.Cog.listener()
@@ -300,7 +300,7 @@ class Profiles(commands.Cog):
 
         if ctx.author.bot:
             return
-        profiles = data_handler.Load("profiles")
+        profiles = data_handler.load("profiles")
 
         try:
             player = profiles[str(ctx.author.id)]
@@ -346,7 +346,7 @@ class Profiles(commands.Cog):
                 await destination.send("You've also unlocked a new colour: Level 10!")
                 player['Settings']['colours']['Rank 10'] = "327c31"
 
-        data_handler.Dump(profiles, "profiles")
+        data_handler.dump(profiles, "profiles")
 
     @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
     async def levelLB(self, ctx, member: discord.Member = None):
@@ -355,7 +355,7 @@ class Profiles(commands.Cog):
         """
         # Sort the dictionary into a list.
         member = member or ctx.author
-        profiles = data_handler.Load("profiles")
+        profiles = data_handler.load("profiles")
         rankings = []
         description = ""
         for player in profiles:
@@ -413,7 +413,7 @@ class Profiles(commands.Cog):
         Resets All rp. Used when testing rate of earn
         """
         profiles = {}
-        data_handler.Dump(profiles, "profiles")
+        data_handler.dump(profiles, "profiles")
         await ctx.send("Reset all profiles.")
 
 def setup(bot):

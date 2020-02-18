@@ -23,7 +23,7 @@ class Clans(commands.Cog):
         """
         Displays info based on your clan stats.
         """
-        profiles = data_handler.Load("profiles")
+        profiles = data_handler.load("profiles")
         
         if clanName is None:
             clanName = profiles[str(ctx.author.id)]["Base"]["clanID"]
@@ -31,7 +31,7 @@ class Clans(commands.Cog):
                 await ctx.send("You aren't in a clan!")
                 return
 
-        clans = data_handler.Load("clans")
+        clans = data_handler.load("clans")
         try:
             clan = clans[clanName]
         except KeyError:
@@ -211,8 +211,8 @@ class Clans(commands.Cog):
         if name is None:
             await ctx.send("Please specify a clan name.")
             return
-        clans = data_handler.Load("clans")
-        profiles = data_handler.Load("profiles")
+        clans = data_handler.load("clans")
+        profiles = data_handler.load("profiles")
         try:
             clan = clans[name]
             await ctx.send("A clan already exists with that name! Pick something else.")
@@ -225,15 +225,15 @@ class Clans(commands.Cog):
         
         await ctx.send("Clan created. Congratulations on becoming a High Constable! Use `b!clan edit` to setup your clan!")
 
-        data_handler.Dump(clans, "clans")
-        data_handler.Dump(profiles, "profiles")
+        data_handler.dump(clans, "clans")
+        data_handler.dump(profiles, "profiles")
 
     @clan.command(name='join')
     async def joinClan(self, ctx, *, clanName:str = None):
         # TODO - Check against invites
         # TODO - Ask for password using wait_for
-        clans = data_handler.Load("clans")
-        profiles = data_handler.Load("profiles")
+        clans = data_handler.load("clans")
+        profiles = data_handler.load("profiles")
         try:
             clan = clans[clanName]
         except KeyError:
@@ -253,8 +253,8 @@ class Clans(commands.Cog):
             return
         
         await ctx.send(f"You have joined {clanName}.")
-        data_handler.Dump(clans, "clans")
-        data_handler.Dump(profiles, "profiles")
+        data_handler.dump(clans, "clans")
+        data_handler.dump(profiles, "profiles")
 
     @clan.command(name='edit')
     async def editClan(self, ctx):
@@ -281,22 +281,22 @@ class Clans(commands.Cog):
         Resets all clan RP.
         """
         clans = {}
-        data_handler.Dump(clans, "clans")
+        data_handler.dump(clans, "clans")
         await ctx.send("Clans reset.")
 
     @commands.is_owner()
     @clan.command(name='fix', hidden = True)
     async def fixClans(self, ctx):
-        clans = data_handler.Load("clans")
+        clans = data_handler.load("clans")
         clans = {}
-        data_handler.Dump(clans, "clans")
+        data_handler.dump(clans, "clans")
         
     @commands.is_owner()
     @commands.command(name='servers', hidden = True)
     async def clans(self, ctx):
         await ctx.send(f"I am in {len(self.bot.guilds)} servers.")
         print(self.bot.guilds)
-        print(data_handler.Load("clans")["BB"].highConstable)
+        print(data_handler.load("clans")["BB"].highConstable)
 
 def setup(bot):
     bot.add_cog(Clans(bot))

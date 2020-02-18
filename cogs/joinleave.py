@@ -22,7 +22,7 @@ class JoinLeaveMessages(commands.Cog):
     # Parameters as per d.py
     async def on_member_join(self,member):
         # Gets the clan data
-        servers = data_handler.Load("clans")
+        servers = data_handler.load("clans")
         
         # Find the channel id
         try:
@@ -78,7 +78,7 @@ class JoinLeaveMessages(commands.Cog):
     # Parameters as per d.py
     async def on_member_leave(self,member):
         # Gets the clan data
-        servers = data_handler.Load("clans")
+        servers = data_handler.load("clans")
         
         # Find the channel id
         try:

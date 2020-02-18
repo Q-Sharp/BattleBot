@@ -2,15 +2,15 @@ import json
 
 class data_handler():
     @staticmethod
-    def Load(File):
+    def load(file):
         try:
-            return json.load(open(f"data/{File}.json"))
+            return json.load(open(f"data/{file}.json"))
         except:
             return None
 
     @staticmethod
-    def Dump(Data, File):
+    def dump(data, file):
         try:
-            json.dump(Data, open(f"data/{File}.json", 'w'), indent = 4)
+            json.dump(data, open(f"data/{file}.json", 'w'), indent = 4)
         except:
             raise
