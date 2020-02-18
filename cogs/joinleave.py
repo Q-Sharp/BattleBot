@@ -2,14 +2,13 @@
 import discord
 from discord.ext import commands
 import asyncio
-# Allows us to load and store json data
-import json
 # Allows us to randomise things
 import random
 # Allows us to manipulate time
 import time
 # Used when calculating times from discord
 import datetime
+from data.data_handler import data_handler
 
 # Our cog for joining and leaving
 class JoinLeaveMessages(commands.Cog):
@@ -23,7 +22,7 @@ class JoinLeaveMessages(commands.Cog):
     # Parameters as per d.py
     async def on_member_join(self,member):
         # Gets the clan data
-        servers = json.load(open('data/clans.json'))
+        servers = data_handler.Load("clans")
         
         # Find the channel id
         try:
@@ -79,7 +78,7 @@ class JoinLeaveMessages(commands.Cog):
     # Parameters as per d.py
     async def on_member_leave(self,member):
         # Gets the clan data
-        servers = json.load(open('data/clans.json'))
+        servers = data_handler.Load("clans")
         
         # Find the channel id
         try:

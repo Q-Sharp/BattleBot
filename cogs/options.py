@@ -6,6 +6,7 @@ import cogs.checks as check
 import random
 import time
 import datetime
+from data.data_handler import data_handler
 
 # Error on option select
 class NotAnOption(commands.CheckFailure):
@@ -32,8 +33,8 @@ class Options(commands.Cog):
         """
         Use to check the current setting of any option.
         """
-        clans = pickle.load(open('data/clans.data','rb'))
-        profiles = pickle.load(open('data/profiles.data','rb'))
+        clans = data_handler.Load("clans")
+        profiles = data_handler.Load("profiles")
         if option == 'modlog':
             await ctx.send("Gotta work on some UI and check so there won't be any errors. Bear with me.")
         else:
@@ -60,7 +61,7 @@ class Options(commands.Cog):
         """
         Sets the modlog to a certain channel or disables it. User must have manage channels permissions.
         """
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = data_handler.Load("clans")
         if channel != None:
             try:
                 options = clans[ctx.guild.id]['options']
@@ -93,7 +94,7 @@ class Options(commands.Cog):
         """
         Setting for per-user rankup messages. They can also be disabled per server as well.
         """
-        profiles = pickle.load(open('data/profiles.data','rb'))
+        profiles = data_handler.Load("profiles")
         settings = ['any','dm','disabled']
         if setting not in settings:
             setting = None
@@ -124,7 +125,7 @@ class Options(commands.Cog):
         Sets rankup messages for the server.
         Requires the manage_channels permission
         """
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = data_handler.Load("clans")
         settings = ['any','channel','disabled','dm']
         if setting not in settings:
             setting = None
@@ -205,7 +206,7 @@ class Options(commands.Cog):
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = data_handler.Load("clans")
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:
@@ -413,7 +414,7 @@ Mentioning channels and users will also work but they won't change for each mess
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = data_handler.Load("clans")
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:

@@ -1,11 +1,10 @@
 import discord
 from discord.ext import commands
 import asyncio
-import json
 import time
 import random
 import cogs.checks as check
-
+from data.data_handler import data_handler
 
 #ranksRP = formula = [int(50*(i**1.5)+100*i+300) for i in range(50)]
 
@@ -24,14 +23,15 @@ class Clans(commands.Cog):
         """
         Displays info based on your clan stats.
         """
-        profiles = json.load(open('data/profiles.json'))
-        clans = json.load(open('data/clans.json'))
+        profiles = data_handler.Load("profiles")
+        
         if clanName is None:
             clanName = profiles[str(ctx.author.id)]["Base"]["clanID"]
             if clanName is None:
                 await ctx.send("You aren't in a clan!")
                 return
-        clans = json.load(open('data/clans.json'))
+
+        clans = data_handler.Load("clans")
         try:
             clan = clans[clanName]
         except KeyError:
@@ -211,8 +211,8 @@ class Clans(commands.Cog):
         if name is None:
             await ctx.send("Please specify a clan name.")
             return
-        clans = json.load(open('data/clans.json'))
-        profiles = json.load(open('data/profiles.json'))
+        clans = data_handler.Load("clans")
+        profiles = data_handler.Load("profiles")
         try:
             clan = clans[name]
             await ctx.send("A clan already exists with that name! Pick something else.")
@@ -225,15 +225,15 @@ class Clans(commands.Cog):
         
         await ctx.send("Clan created. Congratulations on becoming a High Constable! Use `b!clan edit` to setup your clan!")
 
-        json.dump(clans, open('data/clans.json', 'w'), indent = 4)
-        json.dump(profiles, open('data/profiles.json', 'w'), indent = 4)
+        data_handler.Dump(clans, "clans")
+        data_handler.Dump(profiles, "profiles")
 
     @clan.command(name='join')
     async def joinClan(self, ctx, *, clanName:str = None):
         # TODO - Check against invites
         # TODO - Ask for password using wait_for
-        clans = json.load(open('data/clans.json'))
-        profiles = json.load(open('data/profiles.json'))
+        clans = data_handler.Load("clans")
+        profiles = data_handler.Load("profiles")
         try:
             clan = clans[clanName]
         except KeyError:
@@ -253,8 +253,8 @@ class Clans(commands.Cog):
             return
         
         await ctx.send(f"You have joined {clanName}.")
-        json.dump(profiles, open('data/profiles.data', 'wb'), indent = 4)
-        json.dump(clans, open('data/profiles.data','wb'), indent = 4)
+        data_handler.Dump(clans, "clans")
+        data_handler.Dump(profiles, "profiles")
 
     @clan.command(name='edit')
     async def editClan(self, ctx):
@@ -281,22 +281,22 @@ class Clans(commands.Cog):
         Resets all clan RP.
         """
         clans = {}
-        json.dump(clans,open('data/clans.json','w'), indent = 4)
+        data_handler.Dump(clans, "clans")
         await ctx.send("Clans reset.")
 
     @commands.is_owner()
     @clan.command(name='fix', hidden = True)
     async def fixClans(self, ctx):
-        clans = json.load(open('data/clans.json'))
+        clans = data_handler.Load("clans")
         clans = {}
-        json.dump(clans, open('data/clans.json', 'w'), indent = 4)
+        data_handler.Dump(clans, "clans")
         
     @commands.is_owner()
     @commands.command(name='servers', hidden = True)
     async def clans(self, ctx):
         await ctx.send(f"I am in {len(self.bot.guilds)} servers.")
         print(self.bot.guilds)
-        print(json.load(open('data/clans.json'))["BB"].highConstable)
+        print(data_handler.Load("clans")["BB"].highConstable)
 
 def setup(bot):
     bot.add_cog(Clans(bot))
