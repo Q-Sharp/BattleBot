@@ -3,17 +3,15 @@ from asyncio.subprocess import PIPE, STDOUT
 
 import discord
 from discord.ext import commands
-
-import json
+from data.data_handler import data_handler
 
 class Owner(commands.Cog):
     """
     Owner only commands
     """
-
     def __init__(self, bot):
         self.bot = bot
-
+        
     # Defines this as a command.
     # Marked as hidden so it doesn't appear on the help command.
     @commands.command(hidden=True)
@@ -141,7 +139,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def LenProfiles(self,ctx):
         "Lists the amount of people who have a profile. aka the people who have spoken when the bot can see their messages."
-        await ctx.send(len(json.load(open('data/profiles.json'))))
+        await ctx.send(len(data_handler.load("profiles")))
 
 def setup(bot):
     bot.add_cog(Owner(bot))

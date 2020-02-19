@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 import asyncio
-import json
 import cogs.checks as check
+from data.data_handler import data_handler
 
 class ModLog(commands.Cog):
     """
@@ -10,10 +10,11 @@ class ModLog(commands.Cog):
     """
     def __init__(self,bot):
         self.bot = bot
+        
 
     @commands.Cog.listener()
     async def on_message_delete(self,message):
-        servers = json.load(open('data/servers.json'))
+        servers = data_handler.load("servers")
         try:
             if servers[str(message.guild.id)]['Modlog']['channel'] == None:
                 return
@@ -42,7 +43,7 @@ class ModLog(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self,before,after):
         #Checks modlogs are enabled.
-        servers = json.load(open('data/servers.json'))
+        servers = data_handler.load("servers")
         try:
             if servers[str(after.guild.id)]['Modlog']['channel'] == None:
                 return

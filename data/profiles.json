@@ -29,5 +29,36 @@
             },
             "permissions": []
         }
+    },
+    "301764235887902727": {
+        "Base": {
+            "username": "QoO",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 18,
+            "rank": 0,
+            "timeOfNextEarn": 1582045663.6310754
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
     }
 }

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-
+from data.data_handler import data_handler
 
 class HelpCommand(commands.MinimalHelpCommand):
     def __init__(self):
@@ -61,7 +61,7 @@ class Info(commands.Cog):
         self._original_help_command = bot.help_command
         bot.help_command = HelpCommand()
         bot.help_command.cog = self
-
+        
     @commands.command(aliases=["info"])
     async def about(self, ctx):
         """
@@ -78,7 +78,7 @@ class Info(commands.Cog):
         embed.set_footer(text=f"Requested by {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         embed.add_field(name="My parents:",
-                        value="**Main Dev/Founder** - Greenfoot5#2535 \n**Nit-Picker** - Flaming_Galaxy#7245",
+                        value="**Main Dev/Founder** - Greenfoot5#2535 \n**Nit-Picker** - Flaming_Galaxy#7245 \n**Devolper & Refactorer** -- QoO#8879",
                         inline = False)
         embed.add_field(name="Invite me to your server!",
                         value="https://discordapp.com/oauth2/authorize?client_id=612344319323537458&permissions=67501120&scope=bot")

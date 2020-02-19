@@ -4,7 +4,7 @@ from discord.ext import commands
 import discord
 from discord.ext.commands.cooldowns import BucketType
 import cogs.checks as chec
-import pickle
+from data.data_handler import data_handler
 
 """
 If you are not using this inside a cog, add the event decorator e.g:
@@ -157,9 +157,9 @@ class CommandErrorHandler(commands.Cog):
         if member is None:
             await ctx.send("Please specify a member")
             return
-        banned_users = pickle.load(open('data/bannedUsers.data', 'rb'))
+        banned_users = data_handler.load("bannedusers")
         banned_users.append(member.id)
-        pickle.dump(banned_users, open('data/bannedusers.data', 'wb'))
+        data_handler.dump(banned_users, "bannedusers")
 
     @commands.is_owner()
     @commands.command(name="bot-pardon")
@@ -167,15 +167,15 @@ class CommandErrorHandler(commands.Cog):
         if member is None:
             await ctx.send("Please specify a member")
             return
-        banned_users = pickle.load(open('data/bannedUsers.data', 'rb'))
+        banned_users = data_handler.load("bannedusers")
         banned_users.remove(member.id)
-        pickle.dump(banned_users, open('data/bannedusers.data', 'wb'))
+        data_handler.dump(banned_users, "bannedusers")
 
     @commands.is_owner()
     @commands.command(name="reset-bans")
     async def resetBotBans(self, ctx):
         banned_users = []
-        pickle.dump(banned_users, open('data/bannedusers.data', 'wb'))
+        data_handler.dump(banned_users, "bannedusers")
 
 def setup(bot):
     bot.add_cog(CommandErrorHandler(bot))
