@@ -6,9 +6,9 @@
             "country": "Earth"
         },
         "Level": {
-            "rp": 72,
-            "rank": 0,
-            "timeOfNextEarn": 1581969486.1843915
+            "rp": 118,
+            "rank": 1,
+            "timeOfNextEarn": 1582063175.6352856
         },
         "Achievements": {
             "lords": 5,
@@ -25,7 +25,8 @@
             "rankUpMessage": "any",
             "colour": "Default",
             "colours": {
-                "Default": "000000"
+                "Default": "000000",
+                "Rank 1": "fefefe"
             },
             "permissions": []
         }

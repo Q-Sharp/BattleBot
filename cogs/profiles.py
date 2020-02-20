@@ -405,6 +405,54 @@ class Profiles(commands.Cog):
         # Send embed
         await ctx.send(content="Here you go!", embed=embed)
 
+    @profile.group(name = 'options', aliases = ['option', 'o'])
+    async def pOptions(self, ctx, option:str = None):
+        """
+        Checks or change profile options.
+
+        To check options, don't specify an option or values.
+        TO change an option, specify the option and it's new value.
+        Leave the value blank to see possible settings.
+        """
+        profiles = json.load(open("data/profiles.json"))
+        try:
+                player = profiles[str(ctx.author.id)]
+            except KeyError:
+                await ctx.send("An error occured. Please try again.")
+        
+        if option is None:
+            embed = discord.Embed(title = "Personal Settings",
+            description = "<filler text>",
+            colour = int(player["Settings"]["colours"][player["Settings"]["colour"]], 16))
+
+            # rankUpMessage setting
+            if player["Settings"]["rankUpMessage"] == "any":
+                embed.add_field(name = "Rank Up Message : `any`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will DM you.")
+            elif player["Settings"]["rankUpMessage"] == "chat":
+                embed.add_field(name = "Rank Up Message : `chat`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will **not** DM you.")
+            elif player["Settings"]["rankUpMessage"] == "dm":
+                embed.add_field(name = "Rank Up Message : `dm`",
+                value = "This means the bot shall try to DM you with the rank up message. If that's not possible, you won't be informed.")
+            elif player["Settings"]["rankUpMessage"] == "none":
+                embed.add_field(name = "Rank Up Message : `none`",
+                value = "This means you will not be told when you rank up.")
+
+            permissions = "None"
+            # permissions
+            if "*" in player["Settings"]["permissions"]:
+                permissions = "*"
+            
+            embed.add_field(name = "Permissions",
+            value = permissions)
+
+            embed.set_footer(text = f"Requested by {ctx.author.display_name}",
+            icon_url = ctx.author.avatar_url_as(static_format='png'))
+            embed.set_thumbnail(url = ctx.author.avatar_url_as(static_format = 'png'))
+
+            await ctx.send(content = "", embed=embed)
+
     @commands.is_owner()
     @profile.command(name = 'reset', hidden = True)
     async def resetLevel(self, ctx):

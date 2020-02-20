@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
-import pickle
+import json
 import cogs.checks as check
 import random
 import time
@@ -32,22 +32,54 @@ class Options(commands.Cog):
         """
         Use to check the current setting of any option.
         """
-        clans = pickle.load(open('data/clans.data','rb'))
-        profiles = pickle.load(open('data/profiles.data','rb'))
-        if option == 'modlog':
-            await ctx.send("Gotta work on some UI and check so there won't be any errors. Bear with me.")
-        else:
-            await ctx.send("No option selected. Valid options: \n`modlog` - moderation log settings.")
+        if option in ["me", "profile", "p"]:
+            profiles = json.load(open("data/profiles.json"))
+            try:
+                player = profiles[str(ctx.author.id)]
+            except KeyError:
+                await ctx.send("An error occured. Please try again.")
+            embed = discord.Embed(title = "Personal Settings",
+            description = "<filler text>",
+            colour = int(player["Settings"]["colours"][player["Settings"]["colour"]], 16))
 
-    @options.group(name='set',invoke_without_command=True)
-    async def setOptions(self,ctx):
-        """
-        Use this to set the options of the server! Requires user rank 1 minimum.\nAn option may have certain requirements and be either be user or clan settings.
-        """
-        await ctx.send("You haven't specified a setting! Current settings avaliable: \n`modlog` - Specifies a channel to add a modlog to. Leave blank to turn off the modlog.")
+            # rankUpMessage setting
+            if player["Settings"]["rankUpMessage"] == "any":
+                embed.add_field(name = "Rank Up Message : `any`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will DM you.")
+            elif player["Settings"]["rankUpMessage"] == "chat":
+                embed.add_field(name = "Rank Up Message : `chat`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will **not** DM you.")
+            elif player["Settings"]["rankUpMessage"] == "dm":
+                embed.add_field(name = "Rank Up Message : `dm`",
+                value = "This means the bot shall try to DM you with the rank up message. If that's not possible, you won't be informed.")
+            elif player["Settings"]["rankUpMessage"] == "none":
+                embed.add_field(name = "Rank Up Message : `none`",
+                value = "This means you will not be told when you rank up.")
+
+            permissions = "None"
+            # permissions
+            if "*" in player["Settings"]["permissions"]:
+                permissions = "*"
+            
+            embed.add_field(name = "Permissions",
+            value = permissions)
+
+            embed.set_footer(text = f"Requested by {ctx.author.display_name}",
+            icon_url = ctx.author.avatar_url_as(static_format='png'))
+            embed.set_thumbnail(url = ctx.author.avatar_url_as(static_format = 'png'))
+
+            await ctx.send(content = "", embed=embed)
+
+        elif option in ["server", "guild"]:
+            servers = json.load(open("data/profiles.json"))
+            try:
+                server = servers[str(ctx.guild.id)]
+            except KeyError:
+                await ctx.send("Server not found.")
+
 
     @commands.has_permissions(manage_channels=True)
-    @setOptions.group(name='modlog',invoke_without_command=True)
+    @options.group(name='modlog',invoke_without_command=True)
     async def setModLog(self,ctx):
         """
         Settings for moderation logs. Requires manage channels permissions and a clan rank of one minimum.
@@ -55,12 +87,12 @@ class Options(commands.Cog):
         await ctx.send("Please specify a setting. You can find the types in `b!help options set modlog.`")
 
     @commands.has_permissions(manage_channels=True)
-    @setModLog.command(name='channel')
+    @options.command(name='channel')
     async def setModLogChannel(self,ctx,channel:discord.TextChannel=None):
         """
         Sets the modlog to a certain channel or disables it. User must have manage channels permissions.
         """
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = json.load(open('data/clans.json','rb'))
         if channel != None:
             try:
                 options = clans[ctx.guild.id]['options']
@@ -75,13 +107,13 @@ class Options(commands.Cog):
                 clans[ctx.guild.id]['options']['modlog']['channel'] = None
             except KeyError:
                 await ctx.send("You haven't enabled the moderation logs yet. No need to disable them!")
-        pickle.dump(clans,open('data/clans.data','wb'))
+        json.dump(clans,open('data/clans.json','wb'))
         if channel != None:
             await ctx.send(f"Moderation logs now sent to {channel.mention}.")
             return
         await ctx.send("Moderation logs disabled.")
 
-    @setOptions.group(name='levels',invoke_without_command=True)
+    @options.group(name='levels',invoke_without_command=True)
     async def setLevels(self,ctx):
         """
         Options for user and clan notifications
@@ -93,7 +125,7 @@ class Options(commands.Cog):
         """
         Setting for per-user rankup messages. They can also be disabled per server as well.
         """
-        profiles = pickle.load(open('data/profiles.data','rb'))
+        profiles = json.load(open('data/profiles.json','rb'))
         settings = ['any','dm','disabled']
         if setting not in settings:
             setting = None
@@ -115,7 +147,7 @@ class Options(commands.Cog):
         elif setting.lower() == "dm" or setting.lower() == "pm":
             profiles[ctx.author.id]['options']['levels'] = "dm"
         await ctx.send("Options updated.")
-        pickle.dump(profiles,open('data/profiles.data','wb'))
+        json.dump(profiles,open('data/profiles.json','wb'))
 
     @commands.has_permissions(manage_channels=True)
     @setLevels.command(name="clan")
@@ -124,7 +156,7 @@ class Options(commands.Cog):
         Sets rankup messages for the server.
         Requires the manage_channels permission
         """
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = json.load(open('data/clans.json','rb'))
         settings = ['any','channel','disabled','dm']
         if setting not in settings:
             setting = None
@@ -150,12 +182,12 @@ class Options(commands.Cog):
         elif setting.lower() == "dm" or setting.lower() == "pm":
             clans[ctx.guild.id]['options']['levels'] = "dm"
         elif setting.lower() == "channel":
-            clans[ctx.guild.id]['options']['levels'] = {'channel':chanel.id}
+            clans[ctx.guild.id]['options']['levels'] = {'channel':channel.id}
         await ctx.send("Option updated.")
-        pickle.dump(clans,open('data/clans.data','wb'))
+        json.dump(clans,open('data/clans.json','wb'))
 
     @commands.has_permissions(manage_channels=True)
-    @setOptions.group(name='messages', invoke_without_command=True)
+    @options.group(name='messages', invoke_without_command=True)
     async def setMessages(self,ctx):
         """
         Command to change leave and welcome messages
@@ -205,7 +237,7 @@ class Options(commands.Cog):
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = json.load(open('data/clans.json','rb'))
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:
@@ -368,7 +400,7 @@ Mentioning channels and users will also work but they won't change for each mess
                 await asyncio.sleep(0.5)
 
         await ctx.send("You have now left the editor.")
-        pickle.dump(clans,open('data/clans.data','wb'))
+        json.dump(clans,open('data/clans.json','wb'))
 
     @commands.has_permissions(manage_channels=True)
     @setMessages.command(name='leave',inkove_without_command=True)
@@ -413,7 +445,7 @@ Mentioning channels and users will also work but they won't change for each mess
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = pickle.load(open('data/clans.data','rb'))
+        clans = json.load(open('data/clans.json','rb'))
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:
@@ -575,7 +607,7 @@ Mentioning channels and users will also work but they won't change for each mess
                 await asyncio.sleep(0.5)
                 
         await ctx.send("You have now left the editor.")
-        pickle.dump(clans,open('data/clans.data','wb'))
+        json.dump(clans,open('data/clans.json','wb'))
             
 def setup(bot):
     bot.add_cog(Options(bot))

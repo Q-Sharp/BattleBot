@@ -27,7 +27,7 @@
         "Messages": {
             "joinChannel": null,
             "joinMessages": {},
-            "leaveChannel": {},
+            "leaveChannel": null,
             "leaveMessages": {}
         },
         "Modlog": {
