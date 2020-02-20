@@ -6,12 +6,13 @@ import asyncio
 import requests
 # Allows us to use random numbers and choices
 import random
+from data.data_handler import data_handler
 
 class Misc(commands.Cog):
     """
     The most random things.
     """
-    def __init__(self,bot):
+    def __init__(self, bot):
         self.bot = bot
         # Defines all avaliable units and their powers
         self.units = {'Archers':1,
