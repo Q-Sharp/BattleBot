@@ -1,0 +1,33 @@
+{
+    "270190067354435584": {
+        "Base": {
+            "username": "Greenfoot5",
+            "clanID": "#ec1",
+            "country": "UK"
+        },
+        "Level": {
+            "rp": 50,
+            "rank": 0,
+            "timeOfNextEarn": 1582149469.7572343
+        },
+        "Achievements": {
+            "lords": 5,
+            "squires": 13,
+            "rating": 2556
+        },
+        "Favourites": {
+            "unit": "Frost Wizard",
+            "tactic": "FK-Hammer",
+            "tome": "Enhance",
+            "skin": "Shrub HT"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    }
+}

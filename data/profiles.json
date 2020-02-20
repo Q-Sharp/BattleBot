@@ -3,12 +3,18 @@
         "Base": {
             "username": "Greenfoot5",
             "clanID": "#bb1",
-            "country": "Earth"
+            "country": "UK"
         },
         "Level": {
+<<<<<<< HEAD
             "rp": 118,
             "rank": 1,
             "timeOfNextEarn": 1582063175.6352856
+=======
+            "rp": 1356,
+            "rank": 5,
+            "timeOfNextEarn": 1582149469.7572343
+>>>>>>> master
         },
         "Achievements": {
             "lords": 5,
@@ -20,6 +26,947 @@
             "tactic": "FK-Hammer",
             "tome": "Enhance",
             "skin": "Shrub HT"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Rank 5",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe",
+                "Rank 5": "7af8d3"
+            },
+            "permissions": []
+        }
+    },
+    "224958921993879552": {
+        "Base": {
+            "username": "Flaming_Galaxy | APOCALYPSE",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 414,
+            "rank": 2,
+            "timeOfNextEarn": 1582147611.8941615
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "Faceless Knights",
+            "tactic": "FK-Hammer",
+            "tome": "Enhance",
+            "skin": "Shrub HT"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "222436778949214209": {
+        "Base": {
+            "username": "Indy26",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 157,
+            "rank": 1,
+            "timeOfNextEarn": 1582066396.7526286
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "Faceless Knights",
+            "tactic": "FK-Hammer",
+            "tome": "Enhance",
+            "skin": "Shrub HT"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "301764235887902727": {
+        "Base": {
+            "username": "QoO",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 399,
+            "rank": 2,
+            "timeOfNextEarn": 1582139610.5566761
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "Faceless Knights",
+            "tactic": "FK-Hammer",
+            "tome": "Enhance",
+            "skin": "Shrub HT"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "281873002864443392": {
+        "Base": {
+            "username": "Von Fabel",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 71,
+            "rank": 0,
+            "timeOfNextEarn": 1582137582.499493
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "570203995537145877": {
+        "Base": {
+            "username": "[CS] Zekrom",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 168,
+            "rank": 1,
+            "timeOfNextEarn": 1582129027.5689945
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "209245848960368641": {
+        "Base": {
+            "username": "vaiix",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 72,
+            "rank": 0,
+            "timeOfNextEarn": 1582108549.4072466
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "305432200315142144": {
+        "Base": {
+            "username": "eskillthewhite",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 96,
+            "rank": 0,
+            "timeOfNextEarn": 1582099586.5221276
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "212560864140591104": {
+        "Base": {
+            "username": "swapdi",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 15,
+            "rank": 0,
+            "timeOfNextEarn": 1582036769.485385
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "597115042604777503": {
+        "Base": {
+            "username": "Kirzy",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 64,
+            "rank": 0,
+            "timeOfNextEarn": 1582129185.7389688
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "228227310774517771": {
+        "Base": {
+            "username": "[CS] GewoonJasper__",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 219,
+            "rank": 1,
+            "timeOfNextEarn": 1582109441.2034657
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "115536803162750982": {
+        "Base": {
+            "username": "Silly",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 148,
+            "rank": 1,
+            "timeOfNextEarn": 1582137973.2863562
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "246546916479860737": {
+        "Base": {
+            "username": "Sneida",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 287,
+            "rank": 2,
+            "timeOfNextEarn": 1582117774.1651773
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "590112917651980302": {
+        "Base": {
+            "username": "[CS]Lord Mauli",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 38,
+            "rank": 0,
+            "timeOfNextEarn": 1582046123.3498049
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "663843935424348196": {
+        "Base": {
+            "username": "[TT] Inno",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 677,
+            "rank": 3,
+            "timeOfNextEarn": 1582148576.617449
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "667501123418062872": {
+        "Base": {
+            "username": "[ELT] Ivorint",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 41,
+            "rank": 0,
+            "timeOfNextEarn": 1582108903.3394425
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "615450972923101185": {
+        "Base": {
+            "username": "Dark Zealot",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 15,
+            "rank": 0,
+            "timeOfNextEarn": 1582055108.4927416
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "646065834695065610": {
+        "Base": {
+            "username": "James",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 18,
+            "rank": 0,
+            "timeOfNextEarn": 1582060315.1282055
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "679436747506974771": {
+        "Base": {
+            "username": "Psycoblinchen",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 21,
+            "rank": 0,
+            "timeOfNextEarn": 1582061784.6374693
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "579293196299796512": {
+        "Base": {
+            "username": "delinquent1807",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 76,
+            "rank": 0,
+            "timeOfNextEarn": 1582069349.4883847
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "190446958572339200": {
+        "Base": {
+            "username": "Ralen",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 301,
+            "rank": 2,
+            "timeOfNextEarn": 1582129689.691131
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000",
+                "Rank 1": "fefefe"
+            },
+            "permissions": []
+        }
+    },
+    "387932178186764289": {
+        "Base": {
+            "username": "WalkingDead",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 59,
+            "rank": 0,
+            "timeOfNextEarn": 1582133655.766434
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "656523185466114048": {
+        "Base": {
+            "username": "WHOUSE",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 16,
+            "rank": 0,
+            "timeOfNextEarn": 1582107295.0173948
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "666358616772575243": {
+        "Base": {
+            "username": "grgoossens",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 25,
+            "rank": 0,
+            "timeOfNextEarn": 1582113557.287772
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "598207337563553807": {
+        "Base": {
+            "username": "Jayus Maximus",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 20,
+            "rank": 0,
+            "timeOfNextEarn": 1582114151.8651335
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "663406146811592709": {
+        "Base": {
+            "username": "Garner",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 37,
+            "rank": 0,
+            "timeOfNextEarn": 1582130321.2507584
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "278845437413294081": {
+        "Base": {
+            "username": "Noukie",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 58,
+            "rank": 0,
+            "timeOfNextEarn": 1582146520.278462
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "645369580004442125": {
+        "Base": {
+            "username": "Blutadler",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 88,
+            "rank": 0,
+            "timeOfNextEarn": 1582147725.7727594
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "206921562887159808": {
+        "Base": {
+            "username": "Jan sama",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 21,
+            "rank": 0,
+            "timeOfNextEarn": 1582141143.6986992
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "435846964286849024": {
+        "Base": {
+            "username": "Shady",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 87,
+            "rank": 0,
+            "timeOfNextEarn": 1582146936.783964
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
+        },
+        "Settings": {
+            "rankUpMessage": "any",
+            "colour": "Default",
+            "colours": {
+                "Default": "000000"
+            },
+            "permissions": []
+        }
+    },
+    "649156795159412736": {
+        "Base": {
+            "username": "Fit2Kill | Panda93",
+            "clanID": "None",
+            "country": "Earth"
+        },
+        "Level": {
+            "rp": 15,
+            "rank": 0,
+            "timeOfNextEarn": 1582147605.090001
+        },
+        "Achievements": {
+            "lords": 0,
+            "squires": 0,
+            "rating": 1000
+        },
+        "Favourites": {
+            "unit": "None",
+            "tactic": "None",
+            "tome": "None",
+            "skin": "None"
         },
         "Settings": {
             "rankUpMessage": "any",

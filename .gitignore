@@ -105,6 +105,10 @@ venv.bak/
 
 # Custom stuff.
 *.data
+<<<<<<< HEAD
+=======
+data/*.json
+>>>>>>> master
 /.vs
 tooken.py
 
