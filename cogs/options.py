@@ -28,65 +28,12 @@ class Options(commands.Cog):
         else:
             pass
         
-    @commands.group(name='options',invoke_without_command=True)
+    @commands.group(name='options')
     async def options(self,ctx,option:str=None):
         """
         Use to check the current setting of any option.
         """
-<<<<<<< HEAD
-        if option in ["me", "profile", "p"]:
-            profiles = json.load(open("data/profiles.json"))
-            try:
-                player = profiles[str(ctx.author.id)]
-            except KeyError:
-                await ctx.send("An error occured. Please try again.")
-            embed = discord.Embed(title = "Personal Settings",
-            description = "<filler text>",
-            colour = int(player["Settings"]["colours"][player["Settings"]["colour"]], 16))
-
-            # rankUpMessage setting
-            if player["Settings"]["rankUpMessage"] == "any":
-                embed.add_field(name = "Rank Up Message : `any`",
-                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will DM you.")
-            elif player["Settings"]["rankUpMessage"] == "chat":
-                embed.add_field(name = "Rank Up Message : `chat`",
-                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will **not** DM you.")
-            elif player["Settings"]["rankUpMessage"] == "dm":
-                embed.add_field(name = "Rank Up Message : `dm`",
-                value = "This means the bot shall try to DM you with the rank up message. If that's not possible, you won't be informed.")
-            elif player["Settings"]["rankUpMessage"] == "none":
-                embed.add_field(name = "Rank Up Message : `none`",
-                value = "This means you will not be told when you rank up.")
-
-            permissions = "None"
-            # permissions
-            if "*" in player["Settings"]["permissions"]:
-                permissions = "*"
-            
-            embed.add_field(name = "Permissions",
-            value = permissions)
-
-            embed.set_footer(text = f"Requested by {ctx.author.display_name}",
-            icon_url = ctx.author.avatar_url_as(static_format='png'))
-            embed.set_thumbnail(url = ctx.author.avatar_url_as(static_format = 'png'))
-
-            await ctx.send(content = "", embed=embed)
-
-        elif option in ["server", "guild"]:
-            servers = json.load(open("data/profiles.json"))
-            try:
-                server = servers[str(ctx.guild.id)]
-            except KeyError:
-                await ctx.send("Server not found.")
-=======
-        clans = data_handler.load("clans")
-        profiles = data_handler.load("profiles")
-        if option == 'modlog':
-            await ctx.send("Gotta work on some UI and check so there won't be any errors. Bear with me.")
-        else:
-            await ctx.send("No option selected. Valid options: \n`modlog` - moderation log settings.")
->>>>>>> master
-
+        await ctx.send("This seting is now depreciated. Please use the options command in profiles, clans or servers.")
 
     @commands.has_permissions(manage_channels=True)
     @options.group(name='modlog',invoke_without_command=True)
@@ -102,11 +49,7 @@ class Options(commands.Cog):
         """
         Sets the modlog to a certain channel or disables it. User must have manage channels permissions.
         """
-<<<<<<< HEAD
         clans = json.load(open('data/clans.json','rb'))
-=======
-        clans = data_handler.load("clans")
->>>>>>> master
         if channel != None:
             try:
                 options = clans[ctx.guild.id]['options']
@@ -139,11 +82,7 @@ class Options(commands.Cog):
         """
         Setting for per-user rankup messages. They can also be disabled per server as well.
         """
-<<<<<<< HEAD
         profiles = json.load(open('data/profiles.json','rb'))
-=======
-        profiles = data_handler.load("profiles")
->>>>>>> master
         settings = ['any','dm','disabled']
         if setting not in settings:
             setting = None
@@ -174,11 +113,7 @@ class Options(commands.Cog):
         Sets rankup messages for the server.
         Requires the manage_channels permission
         """
-<<<<<<< HEAD
         clans = json.load(open('data/clans.json','rb'))
-=======
-        clans = data_handler.load("clans")
->>>>>>> master
         settings = ['any','channel','disabled','dm']
         if setting not in settings:
             setting = None
@@ -259,11 +194,7 @@ class Options(commands.Cog):
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-<<<<<<< HEAD
         clans = json.load(open('data/clans.json','rb'))
-=======
-        clans = data_handler.load("clans")
->>>>>>> master
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:
@@ -471,11 +402,7 @@ Mentioning channels and users will also work but they won't change for each mess
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-<<<<<<< HEAD
         clans = json.load(open('data/clans.json','rb'))
-=======
-        clans = data_handler.load("clans")
->>>>>>> master
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:

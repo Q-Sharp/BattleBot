@@ -315,7 +315,7 @@ class Profiles(commands.Cog):
                 "Favourites": {
                     "unit": "None", "tactic": "None", "tome": "None", "skin": "None"},
                 "Settings": {
-                    "rankUpMessage": "any", "colour": "Default", "colours": {"Default": "000000"},"permissions": []}}
+                    "rankUpMessage": "chat", "colour": "Default", "colours": {"Default": "000000"},"permissions": []}}
 
             player = profiles[str(ctx.author.id)]
 
@@ -330,12 +330,17 @@ class Profiles(commands.Cog):
         player['Level']['rp'] += gained_rp
 
         
-        if rankedUp and player['Settings']['rankUpMessage'] in ['any','dm']:
-            if player['Settings']['rankUpMessage'] == "any":
+        if rankedUp and player['Settings']['rankUpMessage'] in ['any','dm','chat']:
+            if player['Settings']['rankUpMessage'] in ["any","chat"]:
                 destination = ctx.channel
             elif player['Settings']['rankUpMessage'] == "dm":
                 destination = ctx.author
-            await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to rank {rank}!")
+            try:
+                await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to Rank {rank}!")
+            except discord.Forbidden:
+                if player['Settings']['rankUpMessage'] == "any":
+                    destination = ctx.author
+                    await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to Rank {rank}!")
             if rank == 1:
                 await destination.send("You've also unlocked a new colour: Rank 1!")
                 player['Settings']['colours']['Rank 1'] = "fefefe"
@@ -407,52 +412,92 @@ class Profiles(commands.Cog):
         await ctx.send(content="Here you go!", embed=embed)
 
     @profile.group(name = 'options', aliases = ['option', 'o'])
-    async def pOptions(self, ctx, option:str = None):
+    async def pOptions(self, ctx, option:str = None, value:str = None):
         """
         Checks or change profile options.
 
         To check options, don't specify an option or values.
-        TO change an option, specify the option and it's new value.
+        To change an option, specify the option and it's new value.
         Leave the value blank to see possible settings.
         """
-        profiles = json.load(open("data/profiles.json"))
+        profiles = data_handler.load("profiles")
         try:
-                player = profiles[str(ctx.author.id)]
-            except KeyError:
-                await ctx.send("An error occured. Please try again.")
+            player = profiles[str(ctx.author.id)]
+        except KeyError:
+            await ctx.send("An error occured. Please try again.")
         
         if option is None:
             embed = discord.Embed(title = "Personal Settings",
-            description = "<filler text>",
+            description = "To change an option, specify the option and it's new value.\nLeave the value blank to see possible settings.",
             colour = int(player["Settings"]["colours"][player["Settings"]["colour"]], 16))
 
             # rankUpMessage setting
             if player["Settings"]["rankUpMessage"] == "any":
-                embed.add_field(name = "Rank Up Message : `any`",
+                embed.add_field(name = "`RankUpMessage` **:** `any`",
                 value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will DM you.")
             elif player["Settings"]["rankUpMessage"] == "chat":
-                embed.add_field(name = "Rank Up Message : `chat`",
+                embed.add_field(name = "`RankUpMessage` **:** `chat`",
                 value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will **not** DM you.")
             elif player["Settings"]["rankUpMessage"] == "dm":
-                embed.add_field(name = "Rank Up Message : `dm`",
+                embed.add_field(name = "`RankUpMessage` **:** `dm`",
                 value = "This means the bot shall try to DM you with the rank up message. If that's not possible, you won't be informed.")
             elif player["Settings"]["rankUpMessage"] == "none":
-                embed.add_field(name = "Rank Up Message : `none`",
+                embed.add_field(name = "`RankUpMessage` **:** `none`",
                 value = "This means you will not be told when you rank up.")
 
-            permissions = "None"
-            # permissions
-            if "*" in player["Settings"]["permissions"]:
-                permissions = "*"
+            # Not sure if I want to use this feature...
+            # permissions = "None"
+            # if "*" in player["Settings"]["permissions"]:
+            #     permissions = "*"
             
-            embed.add_field(name = "Permissions",
-            value = permissions)
+            # embed.add_field(name = "Permissions",
+            # value = permissions)
 
             embed.set_footer(text = f"Requested by {ctx.author.display_name}",
             icon_url = ctx.author.avatar_url_as(static_format='png'))
             embed.set_thumbnail(url = ctx.author.avatar_url_as(static_format = 'png'))
 
             await ctx.send(content = "", embed=embed)
+
+        elif option.lower() in ["rum", "rankupmessage", "rankup"]:
+            if value is None:
+                embed = discord.Embed(title = "Rank Up Message",
+                description = "Specify where rank up messages should be allowed.",
+                colour = int(player["Settings"]["colours"][player["Settings"]["colour"]], 16))
+
+                embed.add_field(name = "`any`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will DM you.")
+                embed.add_field(name = "`chat`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will **not** DM you.")
+                embed.add_field(name = "`dm`",
+                value = "This means the bot shall try to DM you with the rank up message. If that's not possible, you won't be informed.")
+                embed.add_field(name = "`none`",
+                value = "This means you will not be told when you rank up.")
+
+                embed.set_footer(text = f"Requested by {ctx.author.display_name}",
+                icon_url = ctx.author.avatar_url_as(static_format='png'))
+
+                await ctx.send(content = "", embed=embed)
+
+            elif value.lower() == "any":
+                player["Settings"]["rankUpMessage"] = "any"
+                await ctx.send(f"{option} updated.")
+
+            elif value.lower() == "chat":
+                player["Settings"]["rankUpMessage"] = "chat"
+                await ctx.send(f"{option} updated.")
+
+            elif value.lower() == "dm":
+                player["Settings"]["rankUpMessage"] = "dm"
+                await ctx.send(f"{option} updated.")
+
+            elif value.lower() == "none":
+                player["Settings"]["rankUpMessage"] = "none"
+                await ctx.send(f"{option} updated.")
+        
+        profiles[str(ctx.author.id)] = player
+        data_handler.dump(profiles, "profiles")
+            
 
     @commands.is_owner()
     @profile.command(name = 'reset', hidden = True)

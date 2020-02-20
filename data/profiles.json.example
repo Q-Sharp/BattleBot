@@ -22,7 +22,7 @@
             "skin": "Shrub HT"
         },
         "Settings": {
-            "rankUpMessage": "any",
+            "rankUpMessage": "chat",
             "colour": "Default",
             "colours": {
                 "Default": "000000"
