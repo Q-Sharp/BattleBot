@@ -63,6 +63,40 @@ class Servers(commands.Cog):
 
         await ctx.send(content="",embed=embed)
 
+    @commands.has_permissions(manage_channels=True)
+    @server.command(name = 'rankupmessages', aliases = ['rum', 'rm', 'rankUpMessages', 'rums', 'RankUpMessages', 'rankupmessage'])
+    async def rankUpMessages(self, ctx, value:str = None, channel = None):
+        """
+        Changes where rank up messages go.
+
+        Valid settings:
+        `any` - Sends them anywhere. Generally depends on the user's setting.
+        `channel` - Sends them to a specific channel (please mention the channel)
+        `none` - Doesn't send any rankup messages to the server. If enabled it can DM the user though.
+        """
+
+        if value not in ['any', 'channel', 'none']:
+            await ctx.send("""That's not a valid setting. Please use one of the following:
+`any` - Sends them anywhere. Generally depends on the user's setting.
+`channel` - Sends them to a specific channel (please mention the channel)
+`none` - Doesn't send any rankup messages to the server. If enabled it can DM the user though.""")
+            return
+        servers = data_handler.load("servers")
+        if value in ['any', 'none']:
+            servers[str(ctx.guild.id)]['Messages']['rankUpMessages'] = value
+        elif value == 'channel':
+            try:
+                servers[str(ctx.guild.id)]['Messages']['rankUpChannel'] = await commands.TextChannelConverter().convert(ctx,channel)
+                servers[str(ctx.guild.id)]['Messages']['rankUpChannel'] = servers[str(ctx.guild.id)]['Messages']['rankUpChannel'].id
+                servers[str(ctx.guild.id)]['Messages']['rankUpMessages'] = "channel"
+            except:
+                await ctx.send("Please select a vaid channel.")
+                return
+
+        data_handler.dump(servers, "servers")
+        await ctx.send("Setting updated.")
+
+    @commands.has_permissions(manage_channels=True)
     @server.command(name = 'join', aliases = ['j','joinmessages','joinMessages','JoinMessages','jm', 'messagesjoin','mj'])
     async def joinMessages(self, ctx):
         """
@@ -260,6 +294,7 @@ Mentioning channels and users will also work but they won't change for each mess
         servers[str(ctx.guild.id)]['Messages'] = server
         data_handler.dump(servers, "servers")
 
+    @commands.has_permissions(manage_channels=True)
     @server.command(name = 'leave', aliases = ['l','leavemessages','leaveMessages','LeaveMessages','lm', 'messagesleave','ml'])
     async def leaveMessages(self, ctx):
         """

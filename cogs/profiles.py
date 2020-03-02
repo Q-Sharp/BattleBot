@@ -343,10 +343,10 @@ class Profiles(commands.Cog):
             sRUM = servers[str(ctx.guild.id)]['Messages']['rankUpMessages']
 
             if sRUM == "channel":
-                destination = servers[str(ctx.guild.id)]['Messages']['rankUpChannel']
+                destination = ctx.guild.get_channel(servers[str(ctx.guild.id)]['Messages']['rankUpChannel'])
             elif sRUM == "any" and pRUM in ["chat", "any"]:
                 destination = ctx.channel
-            elif pRUM == "dm":
+            elif pRUM in ["dm", "any"]:
                 destination = ctx.author
 
             try:
