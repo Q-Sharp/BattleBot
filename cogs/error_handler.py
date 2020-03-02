@@ -167,7 +167,7 @@ class CommandErrorHandler(commands.Cog):
         data_handler.dump(banned_users, "bannedusers")
 
     @commands.is_owner()
-    @commands.command(name="reset-bans" hidden=True)
+    @commands.command(name="reset-bans", hidden=True)
     async def resetBotBans(self, ctx):
         banned_users = []
         data_handler.dump(banned_users, "bannedusers")

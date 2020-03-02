@@ -63,6 +63,40 @@ class Servers(commands.Cog):
 
         await ctx.send(content="",embed=embed)
 
+    
+    @commands.has_permissions(manage_channels=True)
+    @server.command(name = 'modlod', aliases = ['ml'])
+    async def modlogMessages(self, ctx, value:str = None, channel = None):
+        """
+        Enabled/disables the modlog and specifies which channel to send it to.
+
+        Valid values:
+        `[y/yes/enable/on]` - Enables the modlog.
+        `[n/no/disable/off]` - Disables the modlog.
+
+        Please mention the channel to select it. You will have to specify a channel when re-enabling.
+        """
+
+        if value not in ['y','yes','enable','on','n','no','disable','off']:
+            await ctx.send(""" That's not a valid setting. Please use one of the following:
+`[y/yes/enable/on]` - Enables the modlog.
+`[n/no/disable/off]` - Disables the modlog.""")
+
+        servers = data_handler.load("server")
+        if value in ['n','no','disable','off']:
+            servers[str(ctx.guild.id)]['Modlog']['channel'] = None
+        elif value in ['y','yes','enable','on']:
+            try:
+                servers[str(ctx.guild.id)]['Modlog']['channel'] = await commands.TextChannelConverter().convert(ctx,channel)
+                servers[str(ctx.guild.id)]['Modlog']['channel'] = servers[str(ctx.guild.id)]['Modlog']['channel'].id
+            except:
+                await ctx.send("Please select a vaid channel.")
+                return
+
+        data_handler.dump(servers, "servers")
+        await ctx.send("Modlog updated.")
+
+
     @commands.has_permissions(manage_channels=True)
     @server.command(name = 'rankupmessages', aliases = ['rum', 'rm', 'rankUpMessages', 'rums', 'RankUpMessages', 'rankupmessage'])
     async def rankUpMessages(self, ctx, value:str = None, channel = None):
@@ -97,7 +131,7 @@ class Servers(commands.Cog):
         await ctx.send("Setting updated.")
 
     @commands.has_permissions(manage_channels=True)
-    @server.command(name = 'join', aliases = ['j','joinmessages','joinMessages','JoinMessages','jm', 'messagesjoin','mj'])
+    @server.command(name = 'join', aliases = ['j','joinmessages','joinMessages','JoinMessages','jm', 'messagesjoin'])
     async def joinMessages(self, ctx):
         """
         Enters the message editor for join messages.
@@ -295,7 +329,7 @@ Mentioning channels and users will also work but they won't change for each mess
         data_handler.dump(servers, "servers")
 
     @commands.has_permissions(manage_channels=True)
-    @server.command(name = 'leave', aliases = ['l','leavemessages','leaveMessages','LeaveMessages','lm', 'messagesleave','ml'])
+    @server.command(name = 'leave', aliases = ['l','leavemessages','leaveMessages','LeaveMessages','lm', 'messagesleave'])
     async def leaveMessages(self, ctx):
         """
         Enters the message editor for leave messages.
