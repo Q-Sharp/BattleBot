@@ -296,7 +296,6 @@ class Clans(commands.Cog):
     async def clans(self, ctx):
         await ctx.send(f"I am in {len(self.bot.guilds)} servers.")
         print(self.bot.guilds)
-        print(data_handler.load("clans")["BB"].highConstable)
 
 def setup(bot):
     bot.add_cog(Clans(bot))

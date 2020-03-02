@@ -12,7 +12,7 @@ def gainedRP(player, gained_rp):
     if player['Level']['timeOfNextEarn'] > time.time():
         return True, False, player['Level']['rank']
     
-    rem_rp, rank = get_rank_from(player['Level']['rp'] + gained_rp)
+    rank = get_rank_from(player['Level']['rp'] + gained_rp)
 
     if rank > player['Level']['rank']:
         return False, True, rank
@@ -32,7 +32,7 @@ def get_rank_from(rp):
         rem_rp -= config.rp_ranks[rank]
         rank += 1
     # Returns the final values for rank and rem_rp.
-    return rem_rp, rank
+    return rank
 
     
 class Profiles(commands.Cog):
@@ -142,44 +142,52 @@ class Profiles(commands.Cog):
                 while playerID == user.id:
                     playerID = random.choice(list(profiles))
                 user = await self.bot.fetch_user(playerID)
-                player = profiles[playerID]
-                while True:
+                player = profiles[str(playerID)]
+                count = 0
+                while count < 50:
                     try:
                         member = discord.utils.find(lambda g: g.get_member(user.id), self.bot.guilds).get_member(user.id)
                         break
                     except AttributeError:
                         pass
+                    count += 1
+                if count >= 50:
+                    await ctx.send("There was an error. Please retry the command.")
+                    return
                 page1 = discord.Embed(title = f"{user.display_name}'s profile",
-                                      colour = player.colour,
+                                      colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                       description = f"{user.name}#{user.discriminator}")
                 page1.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
                 page1.set_footer(text = f"Requested by {ctx.author.display_name}",
                                  icon_url = ctx.author.avatar_url_as(static_format='png'))
 
+                try:
+                    clan = clans[player['Base']['clanID']]['Base']['name']
+                except KeyError:
+                    clan = "None"
                 page1.add_field(name = "Base Info",
-                                value = f"Account Name: {player.accountName} \nClan: {player.clan} \nCountry: {player.country}",
+                                value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
                                 inline = False)
                 page1.add_field(name = "Level Info",
-                                value = f"Rank: {player.rank} \nTotal Rank Points: {player.rp}",
+                                value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
                                 inline = False)
                 # Add Page 2
                 page2 = discord.Embed(title = f"{user.display_name}'s profile",
-                                      colour = player.colour,
+                                      colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                       description = f"{user.name}#{user.discriminator}")
                 page2.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
                 page2.set_footer(text = f"Requested by {ctx.author.display_name}",
                                  icon_url = ctx.author.avatar_url_as(static_format='png'))
 
                 page2.add_field(name = "Achievements",
-                                value = f"Amount of Lord titles: {player.lords} \nAmount of Squire titles: {player.squires} \nBest :trophy: rating: {player.rating}",
+                                value = f"Amount of Lord titles: {player['Achievements']['lords']} \nAmount of Squire titles: {player['Achievements']['squires']} \nBest :trophy: rating: {player['Achievements']['rating']}",
                                 inline=False)
                 page2.add_field(name = "Fun Favourites",
-                                value=f"Favourite unit: {player.favourites['unit']} \nFavourite Tactic: {player.favourites['tactic']} \nFavourite Tome: {player.favourites['tome']} \nFavourite Skin: {player.favourites['skin']}",
+                                value=f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
                                 inline=False)
-
                 # Add Page 3
                 page3 = discord.Embed(title = f"{user.display_name}'s profile",
-                                      colour = player.colour,
+                                      colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                       description = f"{user.name}#{user.discriminator}")
                 page3.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
                 page3.set_footer(text = f"Requested by {ctx.author.display_name}",
@@ -285,7 +293,6 @@ class Profiles(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        print(colourList)
         player['Settings']['colour'] = colourList[colour]
 
         profiles[ctx.author.id] = player
@@ -315,7 +322,7 @@ class Profiles(commands.Cog):
                 "Favourites": {
                     "unit": "None", "tactic": "None", "tome": "None", "skin": "None"},
                 "Settings": {
-                    "rankUpMessage": "any", "colour": "Default", "colours": {"Default": "000000"},"permissions": []}}
+                    "rankUpMessage": "chat", "colour": "Default", "colours": {"Default": "000000"},"permissions": []}}
 
             player = profiles[str(ctx.author.id)]
 
@@ -329,13 +336,26 @@ class Profiles(commands.Cog):
         player['Level']['timeOfNextEarn'] = time.time() + config.rp_cooldown
         player['Level']['rp'] += gained_rp
 
-        
-        if rankedUp and player['Settings']['rankUpMessage'] in ['any','dm']:
-            if player['Settings']['rankUpMessage'] == "any":
+        pRUM = player['Settings']['rankUpMessage']
+
+        if rankedUp and pRUM in ['any','dm','chat']:
+            servers = data_handler.load("servers")
+            sRUM = servers[str(ctx.guild.id)]['Messages']['rankUpMessages']
+
+            if sRUM == "channel":
+                destination = ctx.guild.get_channel(servers[str(ctx.guild.id)]['Messages']['rankUpChannel'])
+            elif sRUM == "any" and pRUM in ["chat", "any"]:
                 destination = ctx.channel
-            elif player['Settings']['rankUpMessage'] == "dm":
+            elif pRUM in ["dm", "any"]:
                 destination = ctx.author
-            await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to rank {rank}!")
+
+            try:
+                await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to Rank {rank}!")
+            except discord.Forbidden:
+                if pRUM == "any":
+                    destination = ctx.author
+                    await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to Rank {rank}!")
+
             if rank == 1:
                 await destination.send("You've also unlocked a new colour: Rank 1!")
                 player['Settings']['colours']['Rank 1'] = "fefefe"
@@ -405,6 +425,94 @@ class Profiles(commands.Cog):
                          icon_url=ctx.author.avatar_url_as(static_format="png"))
         # Send embed
         await ctx.send(content="Here you go!", embed=embed)
+
+    @profile.group(name = 'options', aliases = ['option', 'o'])
+    async def pOptions(self, ctx, option:str = None, value:str = None):
+        """
+        Checks or change profile options.
+
+        To check options, don't specify an option or values.
+        To change an option, specify the option and it's new value.
+        Leave the value blank to see possible settings.
+        """
+        profiles = data_handler.load("profiles")
+        try:
+            player = profiles[str(ctx.author.id)]
+        except KeyError:
+            await ctx.send("An error occured. Please try again.")
+        
+        if option is None:
+            embed = discord.Embed(title = "Personal Settings",
+            description = "To change an option, specify the option and it's new value.\nLeave the value blank to see possible settings.",
+            colour = int(player["Settings"]["colours"][player["Settings"]["colour"]], 16))
+
+            # rankUpMessage setting
+            if player["Settings"]["rankUpMessage"] == "any":
+                embed.add_field(name = "`RankUpMessage` **:** `any`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will DM you.")
+            elif player["Settings"]["rankUpMessage"] == "chat":
+                embed.add_field(name = "`RankUpMessage` **:** `chat`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will **not** DM you.")
+            elif player["Settings"]["rankUpMessage"] == "dm":
+                embed.add_field(name = "`RankUpMessage` **:** `dm`",
+                value = "This means the bot shall try to DM you with the rank up message. If that's not possible, you won't be informed.")
+            elif player["Settings"]["rankUpMessage"] == "none":
+                embed.add_field(name = "`RankUpMessage` **:** `none`",
+                value = "This means you will not be told when you rank up.")
+
+            # Not sure if I want to use this feature...
+            # permissions = "None"
+            # if "*" in player["Settings"]["permissions"]:
+            #     permissions = "*"
+            
+            # embed.add_field(name = "Permissions",
+            # value = permissions)
+
+            embed.set_footer(text = f"Requested by {ctx.author.display_name}",
+            icon_url = ctx.author.avatar_url_as(static_format='png'))
+            embed.set_thumbnail(url = ctx.author.avatar_url_as(static_format = 'png'))
+
+            await ctx.send(content = "", embed=embed)
+
+        elif option.lower() in ["rum", "rankupmessage", "rankup"]:
+            if value is None:
+                embed = discord.Embed(title = "Rank Up Message",
+                description = "Specify where rank up messages should be allowed.",
+                colour = int(player["Settings"]["colours"][player["Settings"]["colour"]], 16))
+
+                embed.add_field(name = "`any`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will DM you.")
+                embed.add_field(name = "`chat`",
+                value = "This means the bot will try to tell you in chat when you level up, or in the server's level up channel. If it can't do either, it will **not** DM you.")
+                embed.add_field(name = "`dm`",
+                value = "This means the bot shall try to DM you with the rank up message. If that's not possible, you won't be informed.")
+                embed.add_field(name = "`none`",
+                value = "This means you will not be told when you rank up.")
+
+                embed.set_footer(text = f"Requested by {ctx.author.display_name}",
+                icon_url = ctx.author.avatar_url_as(static_format='png'))
+
+                await ctx.send(content = "", embed=embed)
+
+            elif value.lower() == "any":
+                player["Settings"]["rankUpMessage"] = "any"
+                await ctx.send(f"{option} updated.")
+
+            elif value.lower() == "chat":
+                player["Settings"]["rankUpMessage"] = "chat"
+                await ctx.send(f"{option} updated.")
+
+            elif value.lower() == "dm":
+                player["Settings"]["rankUpMessage"] = "dm"
+                await ctx.send(f"{option} updated.")
+
+            elif value.lower() == "none":
+                player["Settings"]["rankUpMessage"] = "none"
+                await ctx.send(f"{option} updated.")
+        
+        profiles[str(ctx.author.id)] = player
+        data_handler.dump(profiles, "profiles")
+            
 
     @commands.is_owner()
     @profile.command(name = 'reset', hidden = True)

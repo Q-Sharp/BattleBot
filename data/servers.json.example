@@ -6,14 +6,17 @@
         "Messages": {
             "joinChannel": 678742300670689320,
             "joinMessages": {
-                "ExampleJoin":"{join.name} has joined the server! They created their account at {join.creationDate}.\nHey, @{join.mention} you are #{join.position} person in this server!\nMake sure to check out #welcome for details on the server and the bot.\nYou can also check out #update-notes for the latest info on the bot!",
-                "Applause":"Let's give a warm round of applause to the newest member of the server, {join.mention}!"
+                "ExampleJoin": "{member_name} has joined the server! They created their account at {created}.\n\nHey {member_mention}, you are the {position}th person to join this server!\n\nMake sure to check out <#612349448101822465> for details on the server and the bot.\nYou can also check out <#612360431985491969> for the latest info on the bot!",
+                "Swoosh": "Swoosh! Here come\u2019s in {member_mention} at number {position}! Welcome!"
             },
             "leaveChannel": 678742300670689320,
             "leaveMessages": {
-                "RIP":"RIP {leave.name}. We'll miss you!",
-                "ExampleLeave":"{leave.name} may have made their account only on {leave.creationDate} at #{leave.position} but the were a true members of the server since {leave.joinDate}. They will be throughly missed!"
-            }
+                "RIP": "RIP {member_name}. We'll miss you!",
+                "ExampleLeave": "{member_name} may have made their account only on {created} at #{position} but the were a true members of the server since {join_date}. They will be throughly missed!"
+            },
+            "temp": "ExampleJoin",
+            "rankUpMessages": "any",
+            "rankUpChannel": null
         },
         "Modlog": {
             "channel": 613800534750789642
@@ -27,8 +30,11 @@
         "Messages": {
             "joinChannel": null,
             "joinMessages": {},
-            "leaveChannel": {},
-            "leaveMessages": {}
+            "leaveChannel": null,
+            "leaveMessages": {},
+            "temp": "",
+            "rankUpMessages": "channel",
+            "rankUpChannel": 611499259816312852
         },
         "Modlog": {
             "channel": null

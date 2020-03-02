@@ -125,7 +125,7 @@ class CommandErrorHandler(commands.Cog):
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
     """Below is an example of a Local Error Handler for our command do_repeat"""
-    @commands.command(name='repeat', aliases=['mimic', 'copy'],hidden=True)
+    @commands.command(name='repeat', aliases=['mimic', 'copy'], hidden=True)
     @commands.cooldown(1,120.0,BucketType.user)
     async def do_repeat(self, ctx, *, inp: str):
         """A simple command which repeats your input!
@@ -147,12 +147,7 @@ class CommandErrorHandler(commands.Cog):
                 await ctx.send("You forgot to give me input to repeat!")
 
     @commands.is_owner()
-    @commands.command(name='error')
-    async def causeError(self,ctx):
-        await ctx.send(anError)
-
-    @commands.is_owner()
-    @commands.command(name="bot-ban")
+    @commands.command(name="bot-ban", hidden=True)
     async def botBan(self, ctx, member:discord.Member=None):
         if member is None:
             await ctx.send("Please specify a member")
@@ -162,7 +157,7 @@ class CommandErrorHandler(commands.Cog):
         data_handler.dump(banned_users, "bannedusers")
 
     @commands.is_owner()
-    @commands.command(name="bot-pardon")
+    @commands.command(name="bot-pardon", hidden=True)
     async def botPardon(self, ctx, member:discord.Member=None):
         if member is None:
             await ctx.send("Please specify a member")
@@ -172,7 +167,7 @@ class CommandErrorHandler(commands.Cog):
         data_handler.dump(banned_users, "bannedusers")
 
     @commands.is_owner()
-    @commands.command(name="reset-bans")
+    @commands.command(name="reset-bans", hidden=True)
     async def resetBotBans(self, ctx):
         banned_users = []
         data_handler.dump(banned_users, "bannedusers")

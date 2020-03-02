@@ -105,6 +105,14 @@ venv.bak/
 
 # Custom stuff.
 *.data
+<<<<<<< HEAD
+=======
 data/*.json
+>>>>>>> master
 /.vs
 tooken.py
+
+# Ignore data files
+data/profiles.json
+data/clans.json
+data/servers.json
