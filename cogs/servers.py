@@ -1,176 +1,83 @@
 import discord
 from discord.ext import commands
 import asyncio
-import json
-import cogs.checks as check
-import random
-import time
-import datetime
 from data.data_handler import data_handler
 
-# Error on option select
-class NotAnOption(commands.CheckFailure):
-    pass
+class Servers(commands.Cog):
 
-class Options(commands.Cog):
-    """
-    Allow per-server customisation of the bot!
-    """
-    def __init__(self,bot):
+    # Initialises the variables and sets the bot.
+    def __init__(self, bot):
         self.bot = bot
-        self.joinSelection = {}
-        self.leaveSelection = {}
+        self.Selection = {}
         self.temp = {}
 
-    async def __error(self,ctx,error):
-        if isinstance(error, NotAnOption):
-            await ctx.send(error)
-        else:
-            pass
-        
-    @commands.group(name='options')
-    async def options(self,ctx,option:str=None):
+    # Our base level command. Due to invoke_without_command=True it means that this command is only run when no
+    # sub-command is run. Makes it a command group with a name.
+    @commands.group(name='server', invoke_without_command = True, aliases = ['s'])
+    # Defines it as a function.
+    async def server(self, ctx):
         """
-        Use to check the current setting of any option.
+        Check information on a server!
         """
-        await ctx.send("This seting is now depreciated. Please use the options command in profiles, clans or servers.")
 
-    @commands.has_permissions(manage_channels=True)
-    @options.group(name='modlog',invoke_without_command=True)
-    async def setModLog(self,ctx):
-        """
-        Settings for moderation logs. Requires manage channels permissions and a clan rank of one minimum.
-        """
-        await ctx.send("Please specify a setting. You can find the types in `b!help options set modlog.`")
-
-    @commands.has_permissions(manage_channels=True)
-    @options.command(name='channel')
-    async def setModLogChannel(self,ctx,channel:discord.TextChannel=None):
-        """
-        Sets the modlog to a certain channel or disables it. User must have manage channels permissions.
-        """
-        clans = json.load(open('data/clans.json','rb'))
-        if channel != None:
-            try:
-                options = clans[ctx.guild.id]['options']
-                try:
-                    options['modlog']['channel'] = channel.id
-                except KeyError:
-                    options['modlog'] = {'channel':channel.id}
-            except KeyError:
-                options = {'modlog':{'channel':channel.id}}
-        else:
-            try:
-                options['modlog']['channel'] = None
-            except KeyError:
-                await ctx.send("You haven't enabled the moderation logs yet. No need to disable them!")
-        json.dump(clans,open('data/clans.json','wb'))
-        if channel != None:
-            await ctx.send(f"Moderation logs now sent to {channel.mention}.")
-            return
-        await ctx.send("Moderation logs disabled.")
-
-    @options.group(name='levels',invoke_without_command=True)
-    async def setLevels(self,ctx):
-        """
-        Options for user and clan notifications
-        """
-        await ctx.send("Please select user or clan")
-
-    @setLevels.command(name='user')
-    async def setLevelsUser(self,ctx,setting:str=None):
-        """
-        Setting for per-user rankup messages. They can also be disabled per server as well.
-        """
-        profiles = json.load(open('data/profiles.json','rb'))
-        settings = ['any','dm','disabled']
-        if setting not in settings:
-            setting = None
-        if setting is None:
-            await ctx.send("""Please select a valid setting:
-\n`any` - Tries to send it in the channel where you earned that rankup. Otherwise sends it via dm.
-\n`dm` - Sends it via DM. Unless a clan channel is set.
-\n`disabled` - No rank up messages.
-""")
-            return
+        servers = data_handler.load("servers")
         try:
-            options = profiles[ctx.author.id]['options']
+            server = servers[str(ctx.guild.id)]
         except KeyError:
-            profiles[ctx.author.id]['options'] = {'levels':"any"}
-        if setting.lower() == "disable" or setting.lower() == "disabled":
-            profiles[ctx.author.id]['options']['levels'] = "disabled"
-        elif setting.lower() == "any":
-            profiles[ctx.author.id]['options']['levels'] = "any"
-        elif setting.lower() == "dm" or setting.lower() == "pm":
-            profiles[ctx.author.id]['options']['levels'] = "dm"
-        await ctx.send("Options updated.")
-        json.dump(profiles,open('data/profiles.json','wb'))
+            await ctx.send("An error has occured. Please note that this command is a wip")
 
-    @commands.has_permissions(manage_channels=True)
-    @setLevels.command(name="clan")
-    async def setLevelClan(self,ctx,setting:str=None,channel:discord.TextChannel=None):
-        """
-        Sets rankup messages for the server.
-        Requires the manage_channels permission
-        """
-        servers = json.load(open('data/servers.json','rb'))
-        settings = ['any','channel','disabled','dm']
-        if setting not in settings:
-            setting = None
-        if setting is None:
-            await ctx.send("""Please select a valid setting:
-\n`any` - Default setting. Enables all messages in the channel they were earnt.
-\n`channel <channel>` - Send them to a certain channel. This also sends clan rankup messages here. If you delete the channel it doesn't send a message.
-\n`disabled` - Doesn't send messages. Also doesn't DM the user unless they have it set to DM.
-\n`dm` - DMs the user unless they have it disabled. Disables clan rankup messages.
-""")
-            return
-        if setting.lower() == "channel" and channel == None:
-            await ctx.send("Please specify a channel.")
-            return
-        try:
-            options = servers[ctx.guild.id]['options']
-        except KeyError:
-            options = {'levels':"any"}
-        if setting.lower() == "disable" or setting.lower() == "disabled":
-            options['levels'] = "disabled"
-        elif setting.lower() == "any":
-            options['levels'] = "any"
-        elif setting.lower() == "dm" or setting.lower() == "pm":
-            options['levels'] = "dm"
-        elif setting.lower() == "channel":
-            options['levels'] = {'channel':channel.id}
-        
-        json.dump(servers,open('data/clans.json','wb'))
-        await ctx.send("Option updated.")
+        embed = discord.Embed(title = ctx.guild.name,
+        description = f"Type: {server['Base']['Type']}",
+        colour = ctx.guild.owner.colour)
 
-    @commands.has_permissions(manage_channels=True)
-    @options.group(name='messages', invoke_without_command=True)
-    async def setMessages(self,ctx):
-        """
-        Command to change leave and welcome messages
-        """
-        await ctx.send("Please select either join or leave.")
+        embed.set_thumbnail(url = ctx.guild.icon_url_as(static_format="png"))
 
-    @commands.has_permissions(manage_channels=True)
-    @setMessages.command(name='join',inkove_without_command=True)
-    async def setJoinMessages(self,ctx):
+        if server['Base']['Type'] == "clan":
+            embed.add_field(name="Clan",value="WIP")
+
+        Channel = server["Messages"]["joinChannel"] or "`none`"
+        embed.add_field(name="`JoinMessages`",
+        value=f"Channel: {ctx.guild.get_channel(Channel).mention}\nMessage amount: {len(server['Messages']['joinMessages'])}")
+
+        Channel = server["Messages"]["leaveChannel"] or "`none`"
+        embed.add_field(name="`LeaveMessages`",
+        value=f"Channel: {ctx.guild.get_channel(Channel).mention}\nMessage amount: {len(server['Messages']['leaveMessages'])}")
+
+        if server["Modlog"]["channel"] is not None:
+            embed.add_field(name = "`Modlog`",
+            value = f"Status: `Enabled`\nChannel: {ctx.guild.get_channel(server['Modlog']['channel']).mention}",
+            inline = False)
+        else:
+            embed.add_field(name = "Modlog",
+            value = "Status: `Disabled`",
+            inline = False)
+
+        if server['Messages']["rankUpMessages"] == "channel":
+            embed.add_field(name = "`RankUpMessages`",
+            value = f"Type: `channel`\nChannel: {ctx.guild.get_channel(server['Messages']['rankUpChannel']).mention}",
+            inline = False)
+        else:
+            embed.add_field(name = "`RankUpMessages`",
+            value = f"Type: {server['Messages']['rankUpMessages']}",
+            inline = False)
+
+        await ctx.send(content="",embed=embed)
+
+    @server.command(name = 'join', aliases = ['j','joinmessages','joinMessages','JoinMessages','jm', 'messagesjoin','mj'])
+    async def joinMessages(self, ctx):
         """
         Enters the message editor for join messages.
+
+        Please note this command generates a lot of spam.
         """
         # Checks they aren't already in the editor.
         try:
-            myVar = self.joinSelection[ctx.author.id]
+            self.Selection[ctx.author.id]
             await ctx.send("You are already in an editor")
             return
-        except KeyError:
+        except:
             pass
-        try:
-            myVar = self.leaveSelection[ctx.author.id]
-            await ctx.send("You are already in an editor.")
-            return
-        except KeyError:
-            pass
+        self.Selection[ctx.author.id] = None
 
         # Create the menu
         description = """`create` or edit a message
@@ -195,13 +102,14 @@ class Options(commands.Cog):
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = json.load(open('data/clans.json','rb'))
+        servers = data_handler.load("servers")
+        server = servers[str(ctx.guild.id)]['Messages']
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:
-            self.joinSelection[ctx.author.id] = None
+            self.Selection[ctx.author.id] = None
             # Breaks when they have a valid selection on the menu
-            while self.joinSelection[ctx.author.id] == None:
+            while self.Selection[ctx.author.id] == None:
                 # Sends the menu and tells them to make a selection
                 mainMessage = await ctx.send(content="Please select an option:",embed=embed)
                 # Checks it's a valid option by the author and is in the correct channel
@@ -214,7 +122,7 @@ class Options(commands.Cog):
                         # Valid option?
                         if m.content.lower() in options:
                             # Sets the selection
-                            self.joinSelection[ctx.author.id] = m.content.lower()
+                            self.Selection[ctx.author.id] = m.content.lower()
                             return True
                         # Invalid option
                         else:
@@ -223,29 +131,29 @@ class Options(commands.Cog):
                     return False
                 try:
                     # Begins the wait_for
-                    select = await self.bot.wait_for('message',check=isOption)
+                    await self.bot.wait_for('message',check=isOption)
                 # Invalid option
                 except KeyError:
                     await ctx.send("That is not a valid option!")
                     await asyncio.sleep(0.5)
             # If they chose to exit
-            if self.joinSelection[ctx.author.id] == "exit":
-                del self.joinSelection[ctx.author.id]
+            if self.Selection[ctx.author.id] == "exit":
+                del self.Selection[ctx.author.id]
                 willExit = True
 
             # The choose to create a message
-            elif self.joinSelection[ctx.author.id] == "create":
+            elif self.Selection[ctx.author.id] == "create":
                 # Checks they don't exceed 15 messages.
                 async def MessageLimitCheck():
                     try:
-                        if len(clans[ctx.guild.id]['options']['messages']['join']) >= 15:
+                        if len(server['joinMessages']) >= 15:
                             await ctx.send("You already have 15 messages. Please delete one to add another.")
-                            return False
+                            return True
                     except KeyError:
                         pass
-                    return True
+                    return False
                 hasHitMessageLimit = await MessageLimitCheck()
-                if hasHitMessageLimit:
+                if not hasHitMessageLimit:
                     # Choose the name
                     def theMessageName(m):
                         if m.author.id != ctx.author.id:
@@ -254,25 +162,17 @@ class Options(commands.Cog):
                             return False
                         # Store the name in a temp variable
                         # Avoids KeyErrors if they haven't set a message before
-                        try:
-                            options = clans[ctx.guild.id]['options']
-                            try:
-                                messages = clans[ctx.guild.id]['options']['messages']['temp']
-                                clans[ctx.guild.id]['options']['messages']['temp'] = m.content
-                            except KeyError:
-                                clans[ctx.guild.id]['options']['messages'] = {'join':{},'leave':{},'temp':m.content}
-                        except KeyError:
-                            clans[ctx.guild.id]['options'] = {'messages':{'join':{},'leave':{},'temp':m.content}}
+                        server["temp"] = m.content
                         return True
                             
                     nameMessage = await ctx.send("What shall be the name of your message?")
-                    createName = await self.bot.wait_for('message',check=theMessageName)
+                    await self.bot.wait_for('message',check=theMessageName)
                     
                     # Set the message
                     def theMessageContent(m):
                         if m.author.id != ctx.author.id or messageMessage.channel.id != m.channel.id:
                             return False
-                        clans[ctx.guild.id]['options']['messages']['join'][str(clans[ctx.guild.id]['options']['messages']['temp'])] = m.content
+                        server['joinMessages'][str(server['temp'])] = m.content
                         return True
                     
                     # Asks them to send the messages and mentions placeholders
@@ -284,14 +184,14 @@ class Options(commands.Cog):
 `{created}` - Tells you when the user created a discord account.
 `{position}` - The position the user joined at.
 Mentioning channels and users will also work but they won't change for each message.""")
-                    createMessage = await self.bot.wait_for('message',check=theMessageContent)
+                    await self.bot.wait_for('message',check=theMessageContent)
 
                     # Ends the create option
                     await ctx.send("Message added. Returning you to the main menu.")
                     await asyncio.sleep(1)
 
             # Sets the channel
-            elif self.joinSelection[ctx.author.id] == "channel":
+            elif self.Selection[ctx.author.id] == "channel":
                 def theChannel(m):
                     return m.author.id == ctx.author.id and aChannel.channel.id == m.channel.id
 
@@ -301,8 +201,8 @@ Mentioning channels and users will also work but they won't change for each mess
 
                 # Sets the channel and makes sure it's a channel.
                 try:
-                    clans[ctx.guild.id]['options']['messages']['joinChannel'] = await commands.TextChannelConverter().convert(ctx,setChannel.content)
-                    clans[ctx.guild.id]['options']['messages']['joinChannel'] = clans[ctx.guild.id]['options']['messages']['joinChannel'].id
+                    server['joinChannel'] = await commands.TextChannelConverter().convert(ctx,setChannel.content)
+                    server['joinChannel'] = server['joinChannel'].id
                     await ctx.send("Channel set. Returning you to the main menu.")
                 except KeyError:
                     await ctx.send("Please create a message first. Returning you to the main menu.")
@@ -311,41 +211,40 @@ Mentioning channels and users will also work but they won't change for each mess
                 await asyncio.sleep(1)
 
             # Allows the user to delete a message
-            elif self.joinSelection[ctx.author.id] == "delete":
+            elif self.Selection[ctx.author.id] == "delete":
                 def theMessageToDelete(m):
                     return m.author.id == ctx.author.id and aMessage.channel.id == m.channel.id
 
-                aMessage = await ctx.send("Which message would you like to delete? Please use the message name, not content.\n\nTo cancel, please choose an invalid name.")
+                aMessage = await ctx.send("Which message would you like to delete? Please use the message name, not content.\n\nTo cancel, please choose an invalid name (anything but the name of a message).")
                 messageToDelete = await self.bot.wait_for('message',check=theMessageToDelete)
 
                 try:
-                    del clans[ctx.guild.id]['options']['messages']['join'][messageToDelete.content]
+                    del server['joinMessages'][messageToDelete.content]
                     await ctx.send(f"Deleted message called `{messageToDelete.content}`")
                 except KeyError:
                     await ctx.send("I can't find a message by that name. Returning you to the main menu.")
 
                 await asyncio.sleep(1)
-            elif self.joinSelection[ctx.author.id] == "list":
+            elif self.Selection[ctx.author.id] == "list":
                 try:
                     msg = ">>> **__Message Names__**\n"
-                    for name in clans[ctx.guild.id]['options']['messages']['join']:
+                    for name in server['joinMessages']:
                         msg += f"\n• `{name}`"
-                        #msg += f"{clans[ctx.guild.id]['options']['messages']['join'][name]}\n"
                     await ctx.send(msg)
                     await asyncio.sleep(5)
                 except KeyError:
                     await ctx.send("Please create some messages first. Returning you to the main menu")
 
                 await asyncio.sleep(1)
-            elif self.joinSelection[ctx.author.id] == "view":
+            elif self.Selection[ctx.author.id] == "view":
                 def theMessageToView(m):
                     return m.author.id == ctx.author.id and aMessage.channel.id == m.channel.id
 
-                aMessage = await ctx.send("Which message would you like to view? Please use the message name, not content.\n\nTo cancel, please choose an invalid name.")
+                aMessage = await ctx.send("Which message would you like to view? Please use the message name, not content.\n\nTo cancel, please choose an invalid name (anything but the name of a message).")
                 messageToView = await self.bot.wait_for('message',check=theMessageToView)
 
                 try:
-                    await ctx.send("`{clans[ctx.author.id]['options']['messages']['join']['messageToView.content']}`")
+                    await ctx.send(f"`{server['joinMessages'][messageToView.content]}`")
                     asyncio.sleep(3)
                 except KeyError:
                     await ctx.send("That message doesn't exist. Returning to main menu")
@@ -354,31 +253,28 @@ Mentioning channels and users will also work but they won't change for each mess
                 
             # If I haven't set that up yet
             else:
-                await ctx.send("Option not created yet.")
+                await ctx.send("Option not created.")
                 await asyncio.sleep(0.5)
 
         await ctx.send("You have now left the editor.")
-        json.dump(clans,open('data/clans.json','wb'))
+        servers[str(ctx.guild.id)]['Messages'] = server
+        data_handler.dump(servers, "servers")
 
-    @commands.has_permissions(manage_channels=True)
-    @setMessages.command(name='leave',inkove_without_command=True)
-    async def setLeaveMessages(self,ctx):
+    @server.command(name = 'leave', aliases = ['l','leavemessages','leaveMessages','leaveMessages','lm', 'messagesleave','ml'])
+    async def leaveMessages(self, ctx):
         """
         Enters the message editor for leave messages.
+
+        Please note this command generates a lot of spam.
         """
         # Checks they aren't already in the editor.
         try:
-            myVar = self.joinSelection[ctx.author.id]
+            self.Selection[ctx.author.id]
             await ctx.send("You are already in an editor")
             return
-        except KeyError:
+        except:
             pass
-        try:
-            myVar = self.leaveSelection[ctx.author.id]
-            await ctx.send("You are already in an editor.")
-            return
-        except KeyError:
-            pass
+        self.Selection[ctx.author.id] = None
 
         # Create the menu
         description = """`create` or edit a message
@@ -396,20 +292,21 @@ Mentioning channels and users will also work but they won't change for each mess
 
         # Display the menu
         embed = discord.Embed(title="Main Menu",
-                              colour=discord.Colour(0xca1b1b), #0xca1b1b
+                              colour=discord.Colour(0x45B858), #0xca1b1b
                               description=description)
 
         embed.set_author(name="Battle Bot Leave Messages",url=self.bot.user.avatar_url_as(static_format='png'))
         embed.set_footer(text=f"Requested by: {ctx.author.display_name}",icon_url=ctx.author.avatar_url_as(static_format='png'))
 
         willExit = False
-        clans = json.load(open('data/clans.json','rb'))
+        servers = data_handler.load("servers")
+        server = servers[str(ctx.guild.id)]['Messages']
         
         # Breaks when they wish to exit. This exits the editor
         while willExit == False:
-            self.leaveSelection[ctx.author.id] = None
+            self.Selection[ctx.author.id] = None
             # Breaks when they have a valid selection on the menu
-            while self.leaveSelection[ctx.author.id] == None:
+            while self.Selection[ctx.author.id] == None:
                 # Sends the menu and tells them to make a selection
                 mainMessage = await ctx.send(content="Please select an option:",embed=embed)
                 # Checks it's a valid option by the author and is in the correct channel
@@ -422,7 +319,7 @@ Mentioning channels and users will also work but they won't change for each mess
                         # Valid option?
                         if m.content.lower() in options:
                             # Sets the selection
-                            self.leaveSelection[ctx.author.id] = m.content.lower()
+                            self.Selection[ctx.author.id] = m.content.lower()
                             return True
                         # Invalid option
                         else:
@@ -431,29 +328,29 @@ Mentioning channels and users will also work but they won't change for each mess
                     return False
                 try:
                     # Begins the wait_for
-                    select = await self.bot.wait_for('message',check=isOption)
+                    await self.bot.wait_for('message',check=isOption)
                 # Invalid option
                 except KeyError:
                     await ctx.send("That is not a valid option!")
                     await asyncio.sleep(0.5)
             # If they chose to exit
-            if self.leaveSelection[ctx.author.id] == "exit":
-                del self.leaveSelection[ctx.author.id]
+            if self.Selection[ctx.author.id] == "exit":
+                del self.Selection[ctx.author.id]
                 willExit = True
 
             # The choose to create a message
-            elif self.leaveSelection[ctx.author.id] == "create":
+            elif self.Selection[ctx.author.id] == "create":
                 # Checks they don't exceed 15 messages.
                 async def MessageLimitCheck():
                     try:
-                        if len(clans[ctx.guild.id]['options']['messages']['leave']) >= 15:
+                        if len(server['leaveMessages']) >= 15:
                             await ctx.send("You already have 15 messages. Please delete one to add another.")
-                            return False
+                            return True
                     except KeyError:
                         pass
-                    return True
+                    return False
                 hasHitMessageLimit = await MessageLimitCheck()
-                if hasHitMessageLimit:
+                if not hasHitMessageLimit:
                     # Choose the name
                     def theMessageName(m):
                         if m.author.id != ctx.author.id:
@@ -462,25 +359,17 @@ Mentioning channels and users will also work but they won't change for each mess
                             return False
                         # Store the name in a temp variable
                         # Avoids KeyErrors if they haven't set a message before
-                        try:
-                            options = clans[ctx.guild.id]['options']
-                            try:
-                                messages = clans[ctx.guild.id]['options']['messages']['temp']
-                                clans[ctx.guild.id]['options']['messages']['temp'] = m.content
-                            except KeyError:
-                                clans[ctx.guild.id]['options']['messages'] = {'join':{},'leave':{},'temp':m.content}
-                        except KeyError:
-                            clans[ctx.guild.id]['options'] = {'messages':{'join':{},'leave':{},'temp':m.content}}
+                        server["temp"] = m.content
                         return True
                             
                     nameMessage = await ctx.send("What shall be the name of your message?")
-                    createName = await self.bot.wait_for('message',check=theMessageName)
+                    await self.bot.wait_for('message',check=theMessageName)
                     
                     # Set the message
                     def theMessageContent(m):
                         if m.author.id != ctx.author.id or messageMessage.channel.id != m.channel.id:
                             return False
-                        clans[ctx.guild.id]['options']['messages']['leave'][str(clans[ctx.guild.id]['options']['messages']['temp'])] = m.content
+                        server['leaveMessages'][str(server['temp'])] = m.content
                         return True
                     
                     # Asks them to send the messages and mentions placeholders
@@ -490,26 +379,27 @@ Mentioning channels and users will also work but they won't change for each mess
 `{member_name}` - References the member  that left by name and discriminator.
 `{created}` - Tells you when the user created a discord account.
 `{position}` - The position the user joined at.
+`{join_date}` - The date the user originally joined the server.
 Mentioning channels and users will also work but they won't change for each message.""")
-                    createMessage = await self.bot.wait_for('message',check=theMessageContent)
+                    await self.bot.wait_for('message',check=theMessageContent)
 
                     # Ends the create option
                     await ctx.send("Message added. Returning you to the main menu.")
                     await asyncio.sleep(1)
 
             # Sets the channel
-            elif self.leaveSelection[ctx.author.id] == "channel":
+            elif self.Selection[ctx.author.id] == "channel":
                 def theChannel(m):
                     return m.author.id == ctx.author.id and aChannel.channel.id == m.channel.id
 
                 # Asks them to specify the channel
-                aChannel = await ctx.send("""Which channel would you like to send welcome messages to?""")
+                aChannel = await ctx.send("""Which channel would you like to send leave messages to?""")
                 setChannel = await self.bot.wait_for('message',check=theChannel)
 
                 # Sets the channel and makes sure it's a channel.
                 try:
-                    clans[ctx.guild.id]['options']['messages']['leaveChannel'] = await commands.TextChannelConverter().convert(ctx,setChannel.content)
-                    clans[ctx.guild.id]['options']['messages']['leaveChannel'] = clans[ctx.guild.id]['options']['messages']['leaveChannel'].id
+                    server['leaveChannel'] = await commands.TextChannelConverter().convert(ctx,setChannel.content)
+                    server['leaveChannel'] = server['leaveChannel'].id
                     await ctx.send("Channel set. Returning you to the main menu.")
                 except KeyError:
                     await ctx.send("Please create a message first. Returning you to the main menu.")
@@ -518,41 +408,40 @@ Mentioning channels and users will also work but they won't change for each mess
                 await asyncio.sleep(1)
 
             # Allows the user to delete a message
-            elif self.leaveSelection[ctx.author.id] == "delete":
+            elif self.Selection[ctx.author.id] == "delete":
                 def theMessageToDelete(m):
                     return m.author.id == ctx.author.id and aMessage.channel.id == m.channel.id
 
-                aMessage = await ctx.send("Which message would you like to delete? Please use the message name, not content.\n\nTo cancel, please choose an invalid name.")
+                aMessage = await ctx.send("Which message would you like to delete? Please use the message name, not content.\n\nTo cancel, please choose an invalid name (anything but the name of a message).")
                 messageToDelete = await self.bot.wait_for('message',check=theMessageToDelete)
 
                 try:
-                    del clans[ctx.guild.id]['options']['messages']['leave'][messageToDelete.content]
+                    del server['leaveMessages'][messageToDelete.content]
                     await ctx.send(f"Deleted message called `{messageToDelete.content}`")
                 except KeyError:
                     await ctx.send("I can't find a message by that name. Returning you to the main menu.")
 
                 await asyncio.sleep(1)
-            elif self.leaveSelection[ctx.author.id] == "list":
+            elif self.Selection[ctx.author.id] == "list":
                 try:
                     msg = ">>> **__Message Names__**\n"
-                    for name in clans[ctx.guild.id]['options']['messages']['leave']:
+                    for name in server['leaveMessages']:
                         msg += f"\n• `{name}`"
-                        #msg += f"{clans[ctx.guild.id]['options']['messages']['leave'][name]}\n"
                     await ctx.send(msg)
                     await asyncio.sleep(5)
                 except KeyError:
                     await ctx.send("Please create some messages first. Returning you to the main menu")
 
                 await asyncio.sleep(1)
-            elif self.leaveSelection[ctx.author.id] == "view":
+            elif self.Selection[ctx.author.id] == "view":
                 def theMessageToView(m):
                     return m.author.id == ctx.author.id and aMessage.channel.id == m.channel.id
 
-                aMessage = await ctx.send("Which message would you like to view? Please use the message name, not content.\n\nTo cancel, please choose an invalid name.")
+                aMessage = await ctx.send("Which message would you like to view? Please use the message name, not content.\n\nTo cancel, please choose an invalid name (anything but the name of a message).")
                 messageToView = await self.bot.wait_for('message',check=theMessageToView)
 
                 try:
-                    await ctx.send("`{clans[ctx.author.id]['options']['messages']['leave']['messageToView.content']}`")
+                    await ctx.send(f"`{server['leaveMessages'][messageToView.content]}`")
                     asyncio.sleep(3)
                 except KeyError:
                     await ctx.send("That message doesn't exist. Returning to main menu")
@@ -561,11 +450,13 @@ Mentioning channels and users will also work but they won't change for each mess
                 
             # If I haven't set that up yet
             else:
-                await ctx.send("Option not created yet.")
+                await ctx.send("Option not created.")
                 await asyncio.sleep(0.5)
-                
+
         await ctx.send("You have now left the editor.")
-        json.dump(clans,open('data/clans.json','wb'))
-            
+        servers[str(ctx.guild.id)]['Messages'] = server
+        data_handler.dump(servers, "servers")
+
 def setup(bot):
-    bot.add_cog(Options(bot))
+    bot.add_cog(Servers(bot))
+    

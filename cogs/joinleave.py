@@ -22,7 +22,7 @@ class JoinLeaveMessages(commands.Cog):
     # Parameters as per d.py
     async def on_member_join(self,member):
         # Gets the clan data
-        servers = data_handler.load("clans")
+        servers = data_handler.load("servers")
         
         # Find the channel id
         try:
@@ -38,13 +38,13 @@ class JoinLeaveMessages(commands.Cog):
         joinName, joinMessage = random.choice(list(servers[str(member.guild.id)]['Messages']['joinMessages'].items()))
 
         # Formats the joinMessage with the placeholders
-        joinMessage = joinMessage.replace("{join.name}",f"{member.name}#{member.discriminator}")
+        joinMessage = joinMessage.replace("{member_name}",f"{member.name}#{member.discriminator}")
         try:
-            joinMessage = joinMessage.replace("{join.mention}",f"{member.mention}")
+            joinMessage = joinMessage.replace("{member_mention}",f"{member.mention}")
         except KeyError:
             pass
         try:
-            joinMessage = joinMessage.replace("{join.creationDate}",f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)") # Turns datetime to time to make it easier to deal with.
+            joinMessage = joinMessage.replace("{created}",f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)") # Turns datetime to time to make it easier to deal with.
         except KeyError:
             pass
         # Creates a join position
@@ -59,7 +59,7 @@ class JoinLeaveMessages(commands.Cog):
                 return item
             join_dates = sorted(join_dates,reverse=False,key=get_key)
             # Set's the join message (by finding the index of the user's join date from the sorted list)
-            joinMessage = joinMessage.replace("{join.position}",f"{join_dates.index(member.joined_at)+1}")
+            joinMessage = joinMessage.replace("{position}",f"{join_dates.index(member.joined_at)+1}")
         except KeyError:
             pass
 
@@ -76,9 +76,9 @@ class JoinLeaveMessages(commands.Cog):
     @commands.Cog.listener()
     # Defines the listener
     # Parameters as per d.py
-    async def on_member_leave(self,member):
+    async def on_member_remove(self, member):
         # Gets the clan data
-        servers = data_handler.load("clans")
+        servers = data_handler.load("servers")
         
         # Find the channel id
         try:
@@ -93,15 +93,15 @@ class JoinLeaveMessages(commands.Cog):
 
         # Formats the leaveMessage with the placeholders
         try:
-            leaveMessage = leaveMessage.replace("{leave.name}", f"{member.name}#{member.discriminator}")
+            leaveMessage = leaveMessage.replace("{member_name}", f"{member.name}#{member.discriminator}")
         except KeyError:
             pass
         try:
-            leaveMessage = leaveMessage.replace("{leave.creationDate}", f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)")
+            leaveMessage = leaveMessage.replace("{created}", f"{member.created_at.ctime()} ({int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)")
         except KeyError:
             pass
         try:
-            leaveMessage = leaveMessage.replace("{leave.joinDate}", f"{member.joined_at.ctime()} ({int(int(time.time() - (member.joined_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)")
+            leaveMessage = leaveMessage.replace("{join_date}", f"{member.joined_at.ctime()} ({int(int(time.time() - (member.joined_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)} days ago)")
         except KeyError:
             pass
         # Creates a join position
@@ -109,10 +109,11 @@ class JoinLeaveMessages(commands.Cog):
             join_dates = []
             for user in member.guild.members:
                 join_dates.append(user.joined_at)
+            join_dates.append(member.joined_at)
             def get_key(item):
                 return item
             join_dates = sorted(join_dates,reverse=False,key=get_key)
-            leaveMessage = leaveMessage.replace("{leave.position}", f"{join_dates.index(member.joined_at)+1}")
+            leaveMessage = leaveMessage.replace("{position}", f"{join_dates.index(member.joined_at)+1}")
         except KeyError:
             pass
 
@@ -122,3 +123,4 @@ class JoinLeaveMessages(commands.Cog):
 # Sets up the cog. Called when loading the file
 def setup(bot):
     bot.add_cog(JoinLeaveMessages(bot))
+    

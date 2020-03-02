@@ -12,7 +12,7 @@ def gainedRP(player, gained_rp):
     if player['Level']['timeOfNextEarn'] > time.time():
         return True, False, player['Level']['rank']
     
-    rem_rp, rank = get_rank_from(player['Level']['rp'] + gained_rp)
+    rank = get_rank_from(player['Level']['rp'] + gained_rp)
 
     if rank > player['Level']['rank']:
         return False, True, rank
@@ -32,7 +32,7 @@ def get_rank_from(rp):
         rem_rp -= config.rp_ranks[rank]
         rank += 1
     # Returns the final values for rank and rem_rp.
-    return rem_rp, rank
+    return rank
 
     
 class Profiles(commands.Cog):
@@ -142,44 +142,52 @@ class Profiles(commands.Cog):
                 while playerID == user.id:
                     playerID = random.choice(list(profiles))
                 user = await self.bot.fetch_user(playerID)
-                player = profiles[playerID]
-                while True:
+                player = profiles[str(playerID)]
+                count = 0
+                while count < 50:
                     try:
                         member = discord.utils.find(lambda g: g.get_member(user.id), self.bot.guilds).get_member(user.id)
                         break
                     except AttributeError:
                         pass
+                    count += 1
+                if count >= 50:
+                    await ctx.send("There was an error. Please retry the command.")
+                    return
                 page1 = discord.Embed(title = f"{user.display_name}'s profile",
-                                      colour = player.colour,
+                                      colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                       description = f"{user.name}#{user.discriminator}")
                 page1.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
                 page1.set_footer(text = f"Requested by {ctx.author.display_name}",
                                  icon_url = ctx.author.avatar_url_as(static_format='png'))
 
+                try:
+                    clan = clans[player['Base']['clanID']]['Base']['name']
+                except KeyError:
+                    clan = "None"
                 page1.add_field(name = "Base Info",
-                                value = f"Account Name: {player.accountName} \nClan: {player.clan} \nCountry: {player.country}",
+                                value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
                                 inline = False)
                 page1.add_field(name = "Level Info",
-                                value = f"Rank: {player.rank} \nTotal Rank Points: {player.rp}",
+                                value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
                                 inline = False)
                 # Add Page 2
                 page2 = discord.Embed(title = f"{user.display_name}'s profile",
-                                      colour = player.colour,
+                                      colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                       description = f"{user.name}#{user.discriminator}")
                 page2.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
                 page2.set_footer(text = f"Requested by {ctx.author.display_name}",
                                  icon_url = ctx.author.avatar_url_as(static_format='png'))
 
                 page2.add_field(name = "Achievements",
-                                value = f"Amount of Lord titles: {player.lords} \nAmount of Squire titles: {player.squires} \nBest :trophy: rating: {player.rating}",
+                                value = f"Amount of Lord titles: {player['Achievements']['lords']} \nAmount of Squire titles: {player['Achievements']['squires']} \nBest :trophy: rating: {player['Achievements']['rating']}",
                                 inline=False)
                 page2.add_field(name = "Fun Favourites",
-                                value=f"Favourite unit: {player.favourites['unit']} \nFavourite Tactic: {player.favourites['tactic']} \nFavourite Tome: {player.favourites['tome']} \nFavourite Skin: {player.favourites['skin']}",
+                                value=f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
                                 inline=False)
-
                 # Add Page 3
                 page3 = discord.Embed(title = f"{user.display_name}'s profile",
-                                      colour = player.colour,
+                                      colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
                                       description = f"{user.name}#{user.discriminator}")
                 page3.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
                 page3.set_footer(text = f"Requested by {ctx.author.display_name}",
@@ -285,7 +293,6 @@ class Profiles(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        print(colourList)
         player['Settings']['colour'] = colourList[colour]
 
         profiles[ctx.author.id] = player
@@ -329,18 +336,26 @@ class Profiles(commands.Cog):
         player['Level']['timeOfNextEarn'] = time.time() + config.rp_cooldown
         player['Level']['rp'] += gained_rp
 
-        
-        if rankedUp and player['Settings']['rankUpMessage'] in ['any','dm','chat']:
-            if player['Settings']['rankUpMessage'] in ["any","chat"]:
+        pRUM = player['Settings']['rankUpMessage']
+
+        if rankedUp and pRUM in ['any','dm','chat']:
+            servers = data_handler.load("servers")
+            sRUM = servers[str(ctx.guild.id)]['Messages']['rankUpMessages']
+
+            if sRUM == "channel":
+                destination = servers[str(ctx.guild.id)]['Messages']['rankUpChannel']
+            elif sRUM == "any" and pRUM in ["chat", "any"]:
                 destination = ctx.channel
-            elif player['Settings']['rankUpMessage'] == "dm":
+            elif pRUM == "dm":
                 destination = ctx.author
+
             try:
                 await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to Rank {rank}!")
             except discord.Forbidden:
-                if player['Settings']['rankUpMessage'] == "any":
+                if pRUM == "any":
                     destination = ctx.author
                     await destination.send(f"Congrats {ctx.author.mention}! You've earned enough rank points to rank up to Rank {rank}!")
+
             if rank == 1:
                 await destination.send("You've also unlocked a new colour: Rank 1!")
                 player['Settings']['colours']['Rank 1'] = "fefefe"

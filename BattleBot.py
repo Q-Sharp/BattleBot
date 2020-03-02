@@ -23,12 +23,12 @@ class BattleBot(commands.Bot):
                                    "cogs.links",
                                    "cogs.info",
                                    "cogs.error_handler",
-                                   'cogs.options',
                                    'cogs.modlog',
                                    'cogs.joinleave',
                                    'cogs.misc',
                                    'cogs.profiles',
-                                   'cogs.clans']
+                                   'cogs.clans',
+                                   'cogs.servers']
         self.load_exts()
 
     def _get_prefix(self, bot, message):
@@ -63,12 +63,6 @@ class BattleBot(commands.Bot):
         with open("tooken.data", "rb") as f:
             tooken = pickle.load(f)
         super().run(tooken, bot=True, reconnect=True)
-
-#@bot.check
-#async def block_banned_users(ctx):
-#    banned_users = pickle.load(open('data/bannedUsers.data', 'rb'))
-#    if ctx.author.id in banned_users:
-#        return False
 
 if __name__ == "__main__":
     if "win" in sys.platform:
