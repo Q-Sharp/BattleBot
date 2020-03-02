@@ -43,7 +43,6 @@ class HelpCommand(commands.MinimalHelpCommand):
 
     def add_bot_commands_formatting(self, commands, heading):
         if commands:
-            print("XD")
             # U+2022 Bullet
             joined = ' \U00002022 '.join(c.name for c in commands)
             self.paginator.add_line(f'__**{heading}**__')
