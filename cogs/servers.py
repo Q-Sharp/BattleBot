@@ -260,7 +260,7 @@ Mentioning channels and users will also work but they won't change for each mess
         servers[str(ctx.guild.id)]['Messages'] = server
         data_handler.dump(servers, "servers")
 
-    @server.command(name = 'leave', aliases = ['l','leavemessages','leaveMessages','leaveMessages','lm', 'messagesleave','ml'])
+    @server.command(name = 'leave', aliases = ['l','leavemessages','leaveMessages','LeaveMessages','lm', 'messagesleave','ml'])
     async def leaveMessages(self, ctx):
         """
         Enters the message editor for leave messages.
