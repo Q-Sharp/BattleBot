@@ -43,6 +43,7 @@ class Servers(commands.Cog):
                     }
                 }
             data_handler.dump(servers, "servers")
+            servers = servers[str(ctx.guild.id)]
         
         if ctx.invoked_subcommand is not None:
             return
