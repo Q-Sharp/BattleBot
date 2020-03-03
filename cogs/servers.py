@@ -26,15 +26,14 @@ class Servers(commands.Cog):
         except KeyError:
             servers[str(ctx.guild.id)] = {
                 "Base": {
-                    "Type": "Clan",
-                    "clanID": "#bb1"
+                    "Type": "Community"
                     },
                     "Messages": {
                         "joinChannel": None,
                         "joinMessages": {},
-                        "leaveChannel": {},
+                        "leaveChannel": None,
                         "leaveMessages": {},
-                        "temp": "ExampleJoin",
+                        "temp": "",
                         "rankUpMessages": "any",
                         "rankUpChannel": None
                     },
@@ -43,7 +42,7 @@ class Servers(commands.Cog):
                     }
                 }
             data_handler.dump(servers, "servers")
-            servers = servers[str(ctx.guild.id)]
+            server = servers[str(ctx.guild.id)]
         
         if ctx.invoked_subcommand is not None:
             return
@@ -55,18 +54,28 @@ class Servers(commands.Cog):
         embed.set_thumbnail(url = ctx.guild.icon_url_as(static_format="png"))
 
         if server['Base']['Type'] == "clan":
-            embed.add_field(name="Clan",value="WIP")
+            embed.add_field(name="Clan",value="(Clans coming soon)")
 
-        Channel = server["Messages"]["joinChannel"] or "`none`"
-        embed.add_field(name="`JoinMessages`",
-        value=f"Channel: {ctx.guild.get_channel(Channel).mention}\nMessage amount: {len(server['Messages']['joinMessages'])}")
+        try:
+            Channel = server["Messages"]["joinChannel"]
+            embed.add_field(name="JoinMessages",
+            value=f"Channel: {ctx.guild.get_channel(Channel).mention}\nMessage amount: {len(server['Messages']['joinMessages'])}")
+        except AttributeError:
+            Channel = "`none`"
+            embed.add_field(name="JoinMessages",
+            value=f"Channel: {Channel}\nMessage amount: {len(server['Messages']['joinMessages'])}")
 
-        Channel = server["Messages"]["leaveChannel"] or "`none`"
-        embed.add_field(name="`LeaveMessages`",
-        value=f"Channel: {ctx.guild.get_channel(Channel).mention}\nMessage amount: {len(server['Messages']['leaveMessages'])}")
+        try:
+            Channel = server["Messages"]["leaveChannel"]
+            embed.add_field(name="LeaveMessages",
+            value=f"Channel: {ctx.guild.get_channel(Channel).mention}\nMessage amount: {len(server['Messages']['leaveMessages'])}")
+        except AttributeError:
+            Channel = "`none`"
+            embed.add_field(name="LeaveMessages",
+            value=f"Channel: {Channel}\nMessage amount: {len(server['Messages']['leaveMessages'])}")
 
         if server["Modlog"]["channel"] is not None:
-            embed.add_field(name = "`Modlog`",
+            embed.add_field(name = "Modlog",
             value = f"Status: `Enabled`\nChannel: {ctx.guild.get_channel(server['Modlog']['channel']).mention}",
             inline = False)
         else:
@@ -75,11 +84,11 @@ class Servers(commands.Cog):
             inline = False)
 
         if server['Messages']["rankUpMessages"] == "channel":
-            embed.add_field(name = "`RankUpMessages`",
+            embed.add_field(name = "RankUpMessages",
             value = f"Type: `channel`\nChannel: {ctx.guild.get_channel(server['Messages']['rankUpChannel']).mention}",
             inline = False)
         else:
-            embed.add_field(name = "`RankUpMessages`",
+            embed.add_field(name = "RankUpMessages",
             value = f"Type: {server['Messages']['rankUpMessages']}",
             inline = False)
 
@@ -103,17 +112,13 @@ class Servers(commands.Cog):
             await ctx.send(""" That's not a valid setting. Please use one of the following:
 `[y/yes/enable/on]` - Enables the modlog.
 `[n/no/disable/off]` - Disables the modlog.""")
+            return
 
-        servers = data_handler.load("server")
+        servers = data_handler.load("servers")
         if value in ['n','no','disable','off']:
             servers[str(ctx.guild.id)]['Modlog']['channel'] = None
         elif value in ['y','yes','enable','on']:
-            try:
-                servers[str(ctx.guild.id)]['Modlog']['channel'] = await commands.TextChannelConverter().convert(ctx,channel)
-                servers[str(ctx.guild.id)]['Modlog']['channel'] = servers[str(ctx.guild.id)]['Modlog']['channel'].id
-            except:
-                await ctx.send("Please select a vaid channel.")
-                return
+            servers[str(ctx.guild.id)]['Modlog']['channel'] = (await commands.TextChannelConverter().convert(ctx,channel)).id
 
         data_handler.dump(servers, "servers")
         await ctx.send("Modlog updated.")
