@@ -13,7 +13,7 @@ class Servers(commands.Cog):
 
     # Our base level command. Due to invoke_without_command=True it means that this command is only run when no
     # sub-command is run. Makes it a command group with a name.
-    @commands.group(name='server', invoke_without_command = True, aliases = ['s'])
+    @commands.group(name='server', aliases = ['s'])
     # Defines it as a function.
     async def server(self, ctx):
         """
@@ -24,7 +24,28 @@ class Servers(commands.Cog):
         try:
             server = servers[str(ctx.guild.id)]
         except KeyError:
-            await ctx.send("An error has occured. Please note that this command is a wip")
+            servers[str(ctx.guild.id)] = {
+                "Base": {
+                    "Type": "Clan",
+                    "clanID": "#bb1"
+                    },
+                    "Messages": {
+                        "joinChannel": None,
+                        "joinMessages": {},
+                        "leaveChannel": {},
+                        "leaveMessages": {},
+                        "temp": "ExampleJoin",
+                        "rankUpMessages": "any",
+                        "rankUpChannel": None
+                    },
+                    "Modlog": {
+                        "channel": None
+                    }
+                }
+            data_handler.dump(servers, "servers")
+        
+        if ctx.invoked_subcommand is not None:
+            return
 
         embed = discord.Embed(title = ctx.guild.name,
         description = f"Type: {server['Base']['Type']}",
