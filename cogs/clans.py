@@ -19,46 +19,49 @@ class Clans(commands.Cog):
         self.editingClan = []
 
     @commands.group(name = 'clan', invoke_without_command = True, aliases = ['c','C'])
-    async def clan(self, ctx, *, clanName:str = None):
+    async def clan(self, ctx, *, clanID:str = None):
         """
         Displays info based on your clan stats.
         """
         profiles = data_handler.load("profiles")
         
-        if clanName is None:
-            clanName = profiles[str(ctx.author.id)]["Base"]["clanID"]
-            if clanName is None:
-                await ctx.send("You aren't in a clan!")
-                return
+        if clanID is None:
+            try:
+                clanID = profiles[str(ctx.author.id)]["Base"]["clanID"]
+                if clanID is None:
+                    await ctx.send("You aren't in a clan!")
+                    return
+            except KeyError:
+                await ctx.send("An error occured. Please try again")
 
         clans = data_handler.load("clans")
         try:
-            clan = clans[clanName]
+            clan = clans[clanID]
         except KeyError:
             await ctx.send("That clan doesn't exist yet! Maybe you'll be it's High Constable?")
             return
         # Base Info
-        page1 = discord.Embed(title = f"{clan.name}",
-                              colour = clan.colour,
-                              description = f"High Constable: {self.bot.get_user(clan.highConstable).name}#{self.bot.get_user(clan.highConstable).discriminator}")
-        page1.set_thumbnail(url = clan.icon)
+        page1 = discord.Embed(title = f"{clan['Base']['name']}",
+                              colour = int(clan['Base']['colours'][clan['Base']['colour']], 16),
+                              description = f"ID: `{clanID}`\nHigh Constable: {self.bot.get_user(clan['Members']['leaderID']).name}#{self.bot.get_user(clan['Members']['leaderID']).discriminator}")
+        page1.set_thumbnail(url = clan["Base"]["icon"])
         page1.set_footer(text = f"Requested by {ctx.author.display_name}",
                          icon_url = ctx.author.avatar_url_as(static_format='png'))
 
         page1.add_field(name = "Description",
-                        value = clan.description,
+                        value = clan["Info"]["description"],
                         inline = False)
-        page1.add_field(name = "Total RP",
-                        value = f"{clan.totalRP()}",
+        page1.add_field(name = "Members",
+                        value = f"{len(clan['Members']['commanderIDs']}/50",
                         inline = False)
-        page1.add_field(name = "Level",
-                        value = f"{clan.level}",
+        page1.add_field(name = "Location",
+                        value = clan["Info"]['location'],
                         inline = False)
-        page1.add_field(name = "Mascot",
-                        value = clan.mascot,
+        page1.add_field(name = "Capacity",
+                        value = f"{len(clan['Members']['commanderIDs']}/50",
                         inline = False)
         page1.add_field(name = "Days since creation",
-                        value = f"{int((time.time() - clan.creationTime) / (60 * 60 * 24))} days",
+                        value = f"{int((time.time() - clan['Info']['creationTime']) / (60 * 60 * 24))} days",
                         inline = False)
 
         message = await ctx.send(embed=page1)
@@ -69,22 +72,32 @@ class Clans(commands.Cog):
         await message.add_reaction("⏩")
 
         # Add Page 2
-        page2 = discord.Embed(title = f"{clan.name}",
-                              colour = clan.colour,
-                              description = f"High Constable: {self.bot.get_user(clan.highConstable).name}#{self.bot.get_user(clan.highConstable).discriminator}")
-        page2.set_thumbnail(url = clan.icon)
+        page2 = discord.Embed(title = f"{clan['Base']['name']}",
+                              colour = int(clan['Base']['colours'][clan['Base']['colour']], 16),
+                              description = f"High Constable: {self.bot.get_user(clan['Members']['leaderID']).name}#{self.bot.get_user(clan['Members']['leaderID']).discriminator}")
+        page2.set_thumbnail(url = clan["Base"]["icon"])
         page2.set_footer(text = f"Requested by {ctx.author.display_name}",
                          icon_url = ctx.author.avatar_url_as(static_format='png'))
-        # Format constables better
+
+        leaders = f"{profiles[str(clan['Members']['leaderID'])]['Base']['username']} - {profiles[str(clan['Members']['leaderID'])]['Achievements']['rating']}"
+        for pID in clan['Members']['coLeaderIDs']:
+            leaders += f"\n{profiles[str(clan['Members']['coLeaderIDs'][pID])]['Base']['Username']} - {profiles[str(clan['Members']['coLeaderIDs'])]['Achievements']['rating']}"
         page2.add_field(name = "Constables:",
-                        value = f"{clan.constableIDs}",
+                        value = constables,
                         inline = False)
-        # Format Captains better
+
+        elders = ""
+        for pID in clan['Members']['elderIDs']:
+            elders += f"\n{profiles[str(clan['Members']['elderIDs'][pID])]['Base']['Username']} - {profiles[str(clan['Members']['elderIDs'])]['Achievements']['rating']}"
         page2.add_field(name = "Captains",
-                        value = f"{clan.captainIDs}",
+                        value = eldes,
                         inline = False)
+
+        members = ""
+        for pID in clan['Members']['memberIDs']:
+            members += f"\n{profiles[str(clan['Members']['memberIDs'][pID])]['Base']['Username']} - {profiles[str(clan['Members']['memberIDs'])]['Achievements']['rating']}"
         page2.add_field(name = "Commanders",
-                        value = f"{clan.commanderIDs}",
+                        value = members,
                         inline = False)
 
         # Add Page 3
@@ -123,9 +136,9 @@ class Clans(commands.Cog):
             reaction = str(reaction)
             if reaction == '⏺️':
                 while True:
-                    newClanName = random.choice(list(clans))
-                    if newClanName != clanID:
-                        clanID = newClanName
+                    newclanID = random.choice(list(clans))
+                    if newclanID != clanID:
+                        clanID = newclanID
                         break
                 clan = clans[clanID]
                 page1 = discord.Embed(title = f"{clan.name}",

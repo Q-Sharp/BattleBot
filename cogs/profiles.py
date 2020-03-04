@@ -340,7 +340,10 @@ class Profiles(commands.Cog):
 
         if rankedUp and pRUM in ['any','dm','chat']:
             servers = data_handler.load("servers")
-            sRUM = servers[str(ctx.guild.id)]['Messages']['rankUpMessages']
+            try:
+                sRUM = servers[str(ctx.guild.id)]['Messages']['rankUpMessages']
+            except KeyError:
+                sRUM = "any"
 
             if sRUM == "channel":
                 destination = ctx.guild.get_channel(servers[str(ctx.guild.id)]['Messages']['rankUpChannel'])
