@@ -7,14 +7,11 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Please descibe what you'd like the bot to do**
+A clear and concise description of what the bot should do.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
-
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Why should the bot do this?**
+There are several things that could be developed, why should this feature be added?
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
