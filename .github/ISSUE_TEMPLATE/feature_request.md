@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**Please descibe what you'd like the bot to do**
+**Please describe what you'd like the bot to do**
 A clear and concise description of what the bot should do.
 
 **Why should the bot do this?**
