@@ -1,0 +1,13 @@
+{
+    "Subscriptions": {
+        "BB-testing": 678742300670689320
+    },
+    "Subscribers": {
+        "678742300670689320": {
+            "Channels": [
+                642116806139576320
+            ],
+            "name": "BB-testing"
+        }
+    }
+}
