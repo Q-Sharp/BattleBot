@@ -19,16 +19,19 @@ class BattleBot(commands.Bot):
             224958921993879552, # Flaming
             301764235887902727 # QoO
             ]
-        self.initial_extensions = ["cogs.owner",
-                                   "cogs.links",
-                                   "cogs.info",
+        self.initial_extensions = ["cogs.clans",
                                    "cogs.error_handler",
-                                   'cogs.modlog',
-                                   'cogs.joinleave',
-                                   'cogs.misc',
-                                   'cogs.profiles',
-                                   'cogs.clans',
-                                   'cogs.servers']
+                                   "cogs.info",
+                                   "cogs.joinleave",
+                                   "cogs.links",
+                                   "cogs.misc",
+                                   "cogs.modlog",
+                                   "cogs.options",
+                                   "cogs.owner",
+                                   "cogs.profiles",
+                                   "cogs.servers",
+                                   "cogs.subscriptions"]
+            
         self.load_exts()
 
     def _get_prefix(self, bot, message):
