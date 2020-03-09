@@ -1,16 +1,26 @@
 {
     "Subscriptions": {
-        "battlebot-updates": 678742300670689320,
+        "bb-updates": 612360431985491969,
         "bl-roadmap": 67647891929432113,
         "blw-updates": 596710575380234241,
         "bl-announcements": 439334622375968771
     },
     "Subscribers": {
-        "678742300670689320": {
-            "Channels": [
-                
-            ],
-            "name": "BB-testing"
+        "612360431985491969": {
+            "Channels": [],
+            "name": "bb-updates"
+        },
+        "67647891929432113": {
+            "Channels": [],
+            "name": "bl-roadmap"
+        },
+        "596710575380234241": {
+            "Channels": [],
+            "name": "blw-updates"
+        },
+        "439334622375968771": {
+            "Channels": [],
+            "name": "bl-announcements"
         }
     }
 }
