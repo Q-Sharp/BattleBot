@@ -26,13 +26,22 @@ class Subscriptions(commands.Cog):
         # Loads our data
         subs = data_handler.load("subscriptions")
 
+        # Defines the message
+        message = "This channel is subscribed to:"
+
         # Goes through each of the valid suscriptions
         for subscription in subs["Subscribers"].values():
             # Checks if the subscriber is subscribed
             if channel.id in subscription["Channels"]:
-                # Actually output the subscription name.
-                # TODO - mention channel name and server and output it all as one message to reduce spam.
-                await ctx.send(subscription["name"])
+                # Adds the correct subscriptions to the message
+                message += f"\n• `{subscription['name']}`"
+
+        # Outputs a different message if they haven't subscribed
+        if message == "This channel is subscribed to:":
+            await ctx.send("This channel isn't subscribed to anything!")
+        # Otherwise just send the message we made
+        else:
+            await ctx.send(message)
 
     @commands.command(name="subscribed", aliases = ['subscribers'])
     async def subscribers(self, ctx, subscription = None):
@@ -41,6 +50,18 @@ class Subscriptions(commands.Cog):
         """
         # Collects the data
         subs = data_handler.load("subscriptions")
+
+        # Outputs all valid subscriptions when the user doesn't specify one.
+        # It lists the subscription name, channel and server.
+        if subscription is None:
+            message = "Please select a valid subscription.\n\nValid subscriptions:"
+            # Cycles through each of the valid descriptions and formats the output
+            # It turns dictionary into a 2d list to do so.
+            for key, value in subs["Subscriptions"].items():
+                message += f"\n• `{key}` - {self.bot.get_channel(value).mention} in **{self.bot.get_channel(value).guild.name}**"
+            await ctx.send(message)
+            return
+
 
         # Checks the subscription is valid, so there is actually a subscription with that name.
         if subscription not in subs["Subscriptions"].keys():
@@ -52,7 +73,9 @@ class Subscriptions(commands.Cog):
             await ctx.send(message)
             return
 
+        # Gets the number of subscribers
         subscribers = len(subs["Subscribers"][str(subs["Subscriptions"][subscription])]["Channels"])
+        # Output a suitable error message.
         await ctx.send(f"`{subscription}` has {subscribers} subscribers.")
 
     @commands.command(name = "subscribe", aliases = ["sub"])
@@ -76,6 +99,7 @@ class Subscriptions(commands.Cog):
                 message += f"\n• `{key}` - {self.bot.get_channel(value).mention} in **{self.bot.get_channel(value).guild.name}**"
             await ctx.send(message)
             return
+
         # Checks the subscription is valid, so there is actually a subscription with that name.
         elif subscription not in subs["Subscriptions"].keys():
             message = "Please select a valid subscription.\n\nValid subscriptions:"
