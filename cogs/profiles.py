@@ -1,12 +1,14 @@
 import discord
-from discord.ext import commands
 import time
 import random
 import datetime
 import asyncio
 import json
 import config
+
+from discord.ext import commands
 from data.data_handler import data_handler
+from itertools import chain
 
 def gainedRP(player, gained_rp):
     if player['Level']['timeOfNextEarn'] > time.time():
@@ -34,6 +36,56 @@ def get_rank_from(rp):
     # Returns the final values for rank and rem_rp.
     return rank
 
+async def get_page(self, ctx, number, userid):
+    await ctx.send(f"UserID: {userid}")
+
+    clans = data_handler.load("clans")
+    profiles = data_handler.load("profiles")
+
+    user = await self.bot.fetch_user(userid)
+    player = profiles[str(userid)]
+
+    page = discord.Embed(title = f"{user.display_name}'s profile",
+                          colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
+                          description = f"{user.name}#{user.discriminator}")
+
+    page.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
+    page.set_footer(text = f"Requested by {ctx.author.display_name}",
+                   icon_url = ctx.author.avatar_url_as(static_format='png'))
+
+    if number == 1:
+        # Page 1
+        try:
+            clan = clans[player['Base']['clanID']]['Base']['name']
+        except:
+            clan = "None"
+
+        page.add_field(name = "Base Info",
+                        value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
+                        inline = False)
+        page.add_field(name = "Level Info",
+                        value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
+                        inline = False)
+
+    if number == 2:
+        # Page 2
+        page.add_field(name = "Achievements",
+                        value = f"Amount of Lord titles: {player['Achievements']['lords']} \nAmount of Squire titles: {player['Achievements']['squires']} \nBest :trophy: rating: {player['Achievements']['rating']}",
+                        inline=False)
+        page.add_field(name = "Fun Favourites",
+                        value = f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
+                        inline=False)
+    
+    if number == 3:
+        # Page 3
+        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
+        days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)
+        discord_date = f"{member.created_at.ctime()} ({days} days ago)"
+    
+        page.add_field(name = "Discord Info",
+                       value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
+
+    return page
     
 class Profiles(commands.Cog):
 
@@ -50,19 +102,38 @@ class Profiles(commands.Cog):
         Check your profile or that of another member.
         You no longer need to mention the user to check their profile!
         """
+
         profiles = data_handler.load("profiles")
+        userids = list()
 
         if userName is None:
             userName = ctx.author.name
             
-        users1 = filter(lambda u: userName in u.name, self.bot.users)
-        allmembers = filter(lambda u: userName in u.members.display_name, self.bot.guilds)
-        users = map(lambda u, m: u + m, users1, allmembers)
-
+        users = list(filter(lambda u: userName in u.name, self.bot.users))
         for user in users:
-            
+            userids.append(user.id)
+
+        for guild in self.bot.guilds:
+            members = list(filter(lambda m: userName in m.display_name, guild.members))
+            for member in members:
+                userids.append(member.id)
+
+        for profil in profiles:
+            if userName in profiles[profil]['Base']['username']:
+              userids.append(int(profil))
+
+        if len(userids) <= 0:
+            await ctx.send("I don't know that Discord User.")
+            return
+
+        if len(userids) > 10:
+            await ctx.send("I found more than 10 matching profiles. Please give me more details.")
+            return
+
+        for userid in userids:
             try:
-                player = profiles[str(user.id)]
+                player = profiles[str(userid)]
+                user = await self.bot.fetch_user(userid)
             except KeyError:
                 await ctx.send("That person doesn't have a profile yet. Get them to send a message and I'll make one!")
                 return
@@ -70,25 +141,7 @@ class Profiles(commands.Cog):
                 await ctx.send("I don't know that Discord User.")
                 return
 
-            clans = data_handler.load("clans")
-            # Base Info
-            page1 = discord.Embed(title = f"{user.display_name}'s profile",
-                                  colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
-                                  description = f"{user.name}#{user.discriminator}")
-            page1.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
-            page1.set_footer(text = f"Requested by {ctx.author.display_name}",
-                             icon_url = ctx.author.avatar_url_as(static_format='png'))
-
-            try:
-                clan = clans[player['Base']['clanID']]['Base']['name']
-            except KeyError:
-                clan = "None"
-            page1.add_field(name = "Base Info",
-                            value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
-                            inline = False)
-            page1.add_field(name = "Level Info",
-                            value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
-                            inline = False)
+            page1 = await get_page(self, ctx, 1, userid)
 
             message = await ctx.send(embed=page1)
             await message.add_reaction("⏪")
@@ -96,40 +149,14 @@ class Profiles(commands.Cog):
             await message.add_reaction("⏺️")
             await message.add_reaction("▶")
             await message.add_reaction("⏩")
-
-            member = discord.utils.find(lambda g: g.get_member(user.id), self.bot.guilds).get_member(user.id)
-
-            # Add Page 2
-            page2 = discord.Embed(title = f"{user.display_name}'s profile",
-                                  colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
-                                  description = f"{user.name}#{user.discriminator}")
-            page2.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
-            page2.set_footer(text = f"Requested by {ctx.author.display_name}",
-                             icon_url = ctx.author.avatar_url_as(static_format='png'))
-
-            page2.add_field(name = "Achievements",
-                            value = f"Amount of Lord titles: {player['Achievements']['lords']} \nAmount of Squire titles: {player['Achievements']['squires']} \nBest :trophy: rating: {player['Achievements']['rating']}",
-                            inline=False)
-            page2.add_field(name = "Fun Favourites",
-                            value=f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
-                            inline=False)
-
-            # Add Page 3
-            page3 = discord.Embed(title = f"{user.display_name}'s profile",
-                                  colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
-                                  description = f"{user.name}#{user.discriminator}")
-            page3.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
-            page3.set_footer(text = f"Requested by {ctx.author.display_name}",
-                             icon_url = ctx.author.avatar_url_as(static_format='png'))
-
-            days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)
-            discord_date = f"{member.created_at.ctime()} ({days} days ago)"
-
-            page3.add_field(name = "Discord Info",
-                            value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
+            
+            page2 = await get_page(self, ctx, 2, userid)
+            page3 = await get_page(self, ctx, 3, userid)
 
             pages = [page1, page2, page3]
             page = 0
+
+            asyncio.Task.
 
             while True:
                 def check(reaction, user):
@@ -143,71 +170,24 @@ class Profiles(commands.Cog):
                     reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
                 except asyncio.TimeoutError:
                     break
+
                 reaction = str(reaction)
+
                 if reaction == '⏺️':
                     playerID = random.choice(list(profiles))
-                    while playerID == user.id:
+                    while playerID == userid:
                         playerID = random.choice(list(profiles))
+
                     user = await self.bot.fetch_user(playerID)
                     player = profiles[str(playerID)]
-                    count = 0
-                    while count < 50:
-                        try:
-                            member = discord.utils.find(lambda g: g.get_member(user.id), self.bot.guilds).get_member(user.id)
-                            break
-                        except AttributeError:
-                            pass
-                        count += 1
-                    if count >= 50:
-                        await ctx.send("There was an error. Please retry the command.")
-                        return
-                    page1 = discord.Embed(title = f"{user.display_name}'s profile",
-                                          colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
-                                          description = f"{user.name}#{user.discriminator}")
-                    page1.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
-                    page1.set_footer(text = f"Requested by {ctx.author.display_name}",
-                                     icon_url = ctx.author.avatar_url_as(static_format='png'))
 
-                    try:
-                        clan = clans[player['Base']['clanID']]['Base']['name']
-                    except KeyError:
-                        clan = "None"
-                    page1.add_field(name = "Base Info",
-                                    value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
-                                    inline = False)
-                    page1.add_field(name = "Level Info",
-                                    value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
-                                    inline = False)
-                    # Add Page 2
-                    page2 = discord.Embed(title = f"{user.display_name}'s profile",
-                                          colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
-                                          description = f"{user.name}#{user.discriminator}")
-                    page2.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
-                    page2.set_footer(text = f"Requested by {ctx.author.display_name}",
-                                     icon_url = ctx.author.avatar_url_as(static_format='png'))
-
-                    page2.add_field(name = "Achievements",
-                                    value = f"Amount of Lord titles: {player['Achievements']['lords']} \nAmount of Squire titles: {player['Achievements']['squires']} \nBest :trophy: rating: {player['Achievements']['rating']}",
-                                    inline=False)
-                    page2.add_field(name = "Fun Favourites",
-                                    value=f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
-                                    inline=False)
-                    # Add Page 3
-                    page3 = discord.Embed(title = f"{user.display_name}'s profile",
-                                          colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
-                                          description = f"{user.name}#{user.discriminator}")
-                    page3.set_thumbnail(url = user.avatar_url_as(static_format = 'png'))
-                    page3.set_footer(text = f"Requested by {ctx.author.display_name}",
-                                     icon_url = ctx.author.avatar_url_as(static_format='png'))
-
-                    days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)
-                    discord_date = f"{member.created_at.ctime()} ({days} days ago)"
-
-                    page3.add_field(name = "Discord Info",
-                                    value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
+                    page1 = await get_page(self, ctx, 1, playerID)
+                    page2 = await get_page(self, ctx, 2, playerID)
+                    page3 = await get_page(self, ctx, 3, playerID)
 
                     pages = [page1, page2, page3]
                     page = 0
+
                 elif reaction == '⏪':
                     page = 0
                 elif reaction == '◀':
@@ -222,6 +202,7 @@ class Profiles(commands.Cog):
                     page = 2
 
                 await message.edit(embed=pages[page])
+
 
     @profile.command(name="set")
     async def setProfile(self, ctx, attribute, *, value):
