@@ -37,9 +37,8 @@ def get_rank_from(rp):
     # Returns the final values for rank and rem_rp.
     return rank
 
+# Function to get profile pages (1 - 3)
 async def get_page(self, ctx, number, userid):
-    await ctx.send(f"UserID: {userid}")
-
     clans = data_handler.load("clans")
     profiles = data_handler.load("profiles")
 
@@ -79,14 +78,66 @@ async def get_page(self, ctx, number, userid):
     
     if number == 3:
         # Page 3
-        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
-        days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)
-        discord_date = f"{member.created_at.ctime()} ({days} days ago)"
+        try:
+            member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
+            days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)
+            discord_date = f"{member.created_at.ctime()} ({days} days ago)"
     
-        page.add_field(name = "Discord Info",
-                       value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
+            page.add_field(name = "Discord Info",
+                           value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
+        except:
+            page.add_field()
 
     return page
+
+# async handling of user reactions
+async def handle_reactions(self, ctx, userid, pages, page1, message):
+    profiles = data_handler.load("profiles")
+    page = 0
+
+    while True:
+       def check(reaction, user):
+           if user.bot == True:
+               return False
+           if reaction.message.id != message.id:
+               return False
+           reactions = ['⏪', '◀', '⏺️', '▶', '⏩']
+           return user.id == ctx.author.id and str(reaction) in reactions
+       try:
+           reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
+       except asyncio.TimeoutError:
+           break
+
+       reaction = str(reaction)
+
+       if reaction == '⏺️':
+           playerid = int(random.choice(list(profiles)))
+           while playerid == userid:
+               playerid = int(random.choice(list(profiles)))
+
+           page1 = await get_page(self, ctx, 1, playerid)
+           page2 = await get_page(self, ctx, 2, playerid)
+           page3 = await get_page(self, ctx, 3, playerid)
+           pages = [page1, page2, page3]
+
+           await message.edit(embed=pages[0])
+           await handle_reactions(self, ctx, playerid, pages, page1, message)
+           return
+
+       elif reaction == '⏪':
+           page = 0
+       elif reaction == '◀':
+           page -= 1
+           if page < 0:
+               page = 0
+       elif reaction == '▶':
+           page += 1
+           if page >= 3:
+               page = 2
+       elif reaction == '⏩':
+           page = 2
+
+       await message.edit(embed=pages[page])
     
 class Profiles(commands.Cog):
 
@@ -103,7 +154,6 @@ class Profiles(commands.Cog):
         Check your profile or that of another member.
         You no longer need to mention the user to check their profile!
         """
-
         profiles = data_handler.load("profiles")
         userids = list()
 
@@ -124,7 +174,7 @@ class Profiles(commands.Cog):
               userids.append(int(profil))
 
         if len(userids) <= 0:
-            await ctx.send("I don't know that Discord User.")
+            await ctx.send("I don't know that Discord User/profile")
             return
 
         if len(userids) > 10:
@@ -134,6 +184,7 @@ class Profiles(commands.Cog):
         # distinct result list
         userids = list(OrderedDict.fromkeys(userids))
         
+        tasklist = list()
         for userid in userids:
             try:
                 player = profiles[str(userid)]
@@ -146,6 +197,9 @@ class Profiles(commands.Cog):
                 return
 
             page1 = await get_page(self, ctx, 1, userid)
+            page2 = await get_page(self, ctx, 2, userid)
+            page3 = await get_page(self, ctx, 3, userid)
+            pages = [page1, page2, page3]
 
             message = await ctx.send(embed=page1)
             await message.add_reaction("⏪")
@@ -154,56 +208,7 @@ class Profiles(commands.Cog):
             await message.add_reaction("▶")
             await message.add_reaction("⏩")
             
-            page2 = await get_page(self, ctx, 2, userid)
-            page3 = await get_page(self, ctx, 3, userid)
-
-            pages = [page1, page2, page3]
-            page = 0
-
-            while True:
-                def check(reaction, user):
-                    if user.bot == True:
-                        return False
-                    if reaction.message.id != message.id:
-                        return False
-                    reactions = ['⏪', '◀', '⏺️', '▶', '⏩']
-                    return user.id == ctx.author.id and str(reaction) in reactions
-                try:
-                    reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
-                except asyncio.TimeoutError:
-                    break
-
-                reaction = str(reaction)
-
-                if reaction == '⏺️':
-                    playerID = random.choice(list(profiles))
-                    while playerID == userid:
-                        playerID = random.choice(list(profiles))
-
-                    user = await self.bot.fetch_user(playerID)
-                    player = profiles[str(playerID)]
-
-                    page1 = await get_page(self, ctx, 1, playerID)
-                    page2 = await get_page(self, ctx, 2, playerID)
-                    page3 = await get_page(self, ctx, 3, playerID)
-
-                    pages = [page1, page2, page3]
-                    page = 0
-
-                elif reaction == '⏪':
-                    page = 0
-                elif reaction == '◀':
-                    page -= 1
-                    if page < 0:
-                        page = 0
-                elif reaction == '▶':
-                    page += 1
-                    if page >= 3:
-                        page = 2
-                elif reaction == '⏩':
-                    page = 2
-
-                await message.edit(embed=pages[page])
+            tasklist.append(asyncio.create_task(handle_reactions(self, ctx, userid, pages, page1, message)))
 
 
     @profile.command(name="set")
@@ -242,7 +247,7 @@ class Profiles(commands.Cog):
             elif attribute in ["country", "location"]:
                 player['Base']['country'] = value
             elif attribute in ["name", "accountname", "account", "username"]:
-                player['Base']['Username'] = value
+                player['Base']['username'] = value
             else:
                 await ctx.send("This is not a valid setting. Check your profile for valid settings.")
                 return
