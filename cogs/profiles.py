@@ -9,6 +9,7 @@ import config
 from discord.ext import commands
 from data.data_handler import data_handler
 from itertools import chain
+from collections import OrderedDict
 
 def gainedRP(player, gained_rp):
     if player['Level']['timeOfNextEarn'] > time.time():
@@ -130,6 +131,9 @@ class Profiles(commands.Cog):
             await ctx.send("I found more than 10 matching profiles. Please give me more details.")
             return
 
+        # distinct result list
+        userids = list(OrderedDict.fromkeys(userids))
+        
         for userid in userids:
             try:
                 player = profiles[str(userid)]
@@ -155,8 +159,6 @@ class Profiles(commands.Cog):
 
             pages = [page1, page2, page3]
             page = 0
-
-            asyncio.Task.
 
             while True:
                 def check(reaction, user):
