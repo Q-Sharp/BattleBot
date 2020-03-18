@@ -90,6 +90,24 @@ async def get_page(self, ctx, number, userid):
 
     return page
 
+def get_reaction(number, reaction = None):
+    reactions = {
+        1: "①",
+        2: "②",
+        3: "③",
+        4: "④",
+        5: "⑤",
+        6: "⑥",
+        7: "⑦",
+        8: "⑧",
+        9: "⑨"
+    }
+
+    if reaction is None:
+        return reactions.get(number, 0)
+    else:
+        return list(reactions.keys())[list(reactions.values()).number(reaction)]
+
 # async handling of user reactions
 async def handle_reactions(self, ctx, userid, pages, page1, message):
     profiles = data_handler.load("profiles")
@@ -158,44 +176,66 @@ class Profiles(commands.Cog):
         userids = list()
 
         if userName is None:
-            userName = ctx.author.name
-            
-        users = list(filter(lambda u: userName in u.name, self.bot.users))
+            foundUserName = ctx.author.name
+        else:
+            foundUserName = userName
+
+        users = list(filter(lambda u: foundUserName in u.name, self.bot.users))
         for user in users:
             userids.append(user.id)
 
-        for guild in self.bot.guilds:
-            members = list(filter(lambda m: userName in m.display_name, guild.members))
-            for member in members:
-                userids.append(member.id)
+        if userName is not None:
+            for guild in self.bot.guilds:
+                members = list(filter(lambda m: foundUserName in m.display_name, guild.members))
+                for member in members:
+                    userids.append(member.id)
 
-        for profil in profiles:
-            if userName in profiles[profil]['Base']['username']:
-              userids.append(int(profil))
+            for profil in profiles:
+                if foundUserName in profiles[profil]['Base']['username']:
+                  userids.append(int(profil))
+
+        # distinct result list
+        userids = list(OrderedDict.fromkeys(userids))
 
         if len(userids) <= 0:
             await ctx.send("I don't know that Discord User/profile")
             return
 
-        if len(userids) > 10:
+        if len(userids) >= 10:
             await ctx.send("I found more than 10 matching profiles. Please give me more details.")
             return
 
-        # distinct result list
-        userids = list(OrderedDict.fromkeys(userids))
-        
+        if len(userids) > 1 and userName is not None:
+                await ctx.send("I found more than 1 matching profile. Please select the correct profile.")
+
+                profiles = data_handler.load("profiles")
+
+                selectionpage = discord.Embed(title = "Select the index of the users to profile", description = "")
+                selection = await ctx.send(embed=selectionpage)
+                foundUser = list()
+                i = 1
+
+                for userid in userids:
+                    user = await self.bot.fetch_user(userid)
+                    player = profiles[str(userid)]
+
+                    foundUser.append([i, userid])
+                    await selection.add_reaction(str(get_reaction(i)))
+                    page.add_field(name = f"#{i}",
+                        value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}",
+                        inline = False)
+                    #await ctx.send(f"#{i} - {user.name}#{user.discriminator} - Account Name: {player['Base']['username']}")
+                    i += 1
+                
+                try:
+                    reaction, user = await self.bot.wait_for('selection', timeout=30.0, check=(lambda c: c.author == selection.author))
+                except asyncio.TimeoutError:
+                    return
+               
+                userids = list(int(get_reaction(0, reaction)))
+              
         tasklist = list()
         for userid in userids:
-            try:
-                player = profiles[str(userid)]
-                user = await self.bot.fetch_user(userid)
-            except KeyError:
-                await ctx.send("That person doesn't have a profile yet. Get them to send a message and I'll make one!")
-                return
-            except AttributeError:
-                await ctx.send("I don't know that Discord User.")
-                return
-
             page1 = await get_page(self, ctx, 1, userid)
             page2 = await get_page(self, ctx, 2, userid)
             page3 = await get_page(self, ctx, 3, userid)
