@@ -37,6 +37,7 @@ def get_rank_from(rp):
     # Returns the final values for rank and rem_rp.
     return rank
 
+
 # Function to get profile pages (1 - 3)
 async def get_page(self, ctx, number, userid):
     clans = data_handler.load("clans")
@@ -71,10 +72,10 @@ async def get_page(self, ctx, number, userid):
         # Page 2
         page.add_field(name = "Achievements",
                         value = f"Amount of Lord titles: {player['Achievements']['lords']} \nAmount of Squire titles: {player['Achievements']['squires']} \nBest :trophy: rating: {player['Achievements']['rating']}",
-                        inline=False)
+                        inline = False)
         page.add_field(name = "Fun Favourites",
                         value = f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
-                        inline=False)
+                        inline = False)
     
     if number == 3:
         # Page 3
@@ -90,23 +91,25 @@ async def get_page(self, ctx, number, userid):
 
     return page
 
+# get reaction with number + vice versa
 def get_reaction(number, reaction = None):
     reactions = {
-        1: "①",
-        2: "②",
-        3: "③",
-        4: "④",
-        5: "⑤",
-        6: "⑥",
-        7: "⑦",
-        8: "⑧",
-        9: "⑨"
+        1: "1\u20e3",
+        2: "2\u20e3",
+        3: "3\u20e3",
+        4: "4\u20e3",
+        5: "5\u20e3",
+        6: "6\u20e3",
+        7: "7\u20e3",
+        8: "8\u20e3",
+        9: "9\u20e3",
+        10: "10\u20e3"
     }
 
     if reaction is None:
         return reactions.get(number, 0)
     else:
-        return list(reactions.keys())[list(reactions.values()).number(reaction)]
+        return list(reactions.keys())[list(reactions.values()).index(reaction)]
 
 # async handling of user reactions
 async def handle_reactions(self, ctx, userid, pages, page1, message):
@@ -157,8 +160,8 @@ async def handle_reactions(self, ctx, userid, pages, page1, message):
 
        await message.edit(embed=pages[page])
     
-class Profiles(commands.Cog):
 
+class Profiles(commands.Cog):
     # Initialises the variables and sets the bot.
     def __init__(self, bot):
         self.bot = bot
@@ -175,6 +178,7 @@ class Profiles(commands.Cog):
         profiles = data_handler.load("profiles")
         userids = list()
 
+        # if user wants to display his own profile, display only his own.
         if userName is None:
             foundUserName = ctx.author.name
         else:
@@ -201,16 +205,16 @@ class Profiles(commands.Cog):
             await ctx.send("I don't know that Discord User/profile")
             return
 
-        if len(userids) >= 10:
-            await ctx.send("I found more than 10 matching profiles. Please give me more details.")
+        if len(userids) > 10:
+            await ctx.send("I found more than 10 matching profiles. Please be more specific.")
             return
 
         if len(userids) > 1 and userName is not None:
-                await ctx.send("I found more than 1 matching profile. Please select the correct profile.")
-
                 profiles = data_handler.load("profiles")
 
-                selectionpage = discord.Embed(title = "Select the index of the users to profile", description = "")
+                selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
+                selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
+
                 selection = await ctx.send(embed=selectionpage)
                 foundUser = list()
                 i = 1
@@ -219,20 +223,22 @@ class Profiles(commands.Cog):
                     user = await self.bot.fetch_user(userid)
                     player = profiles[str(userid)]
 
-                    foundUser.append([i, userid])
-                    await selection.add_reaction(str(get_reaction(i)))
-                    page.add_field(name = f"#{i}",
-                        value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}",
-                        inline = False)
-                    #await ctx.send(f"#{i} - {user.name}#{user.discriminator} - Account Name: {player['Base']['username']}")
+                    reactionString = str(get_reaction(i))
+
+                    selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
+                    foundUser.append(userid)
+                    await selection.add_reaction(reactionString)
                     i += 1
-                
+
+                await selection.edit(embed=selectionpage)
                 try:
-                    reaction, user = await self.bot.wait_for('selection', timeout=30.0, check=(lambda c: c.author == selection.author))
+                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=lambda r, u: u.id == ctx.author.id and u.bot == False)
                 except asyncio.TimeoutError:
+                    ctx.send("No reaction!")
                     return
-               
-                userids = list(int(get_reaction(0, reaction)))
+
+                userids = list()
+                userids.append(foundUser[int(get_reaction(0, str(reaction))) - 1])
               
         tasklist = list()
         for userid in userids:
