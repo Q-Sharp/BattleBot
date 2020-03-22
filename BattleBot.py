@@ -2,7 +2,7 @@ import asyncio
 import pickle
 import sys
 import traceback
-import asyncpg
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -24,7 +24,7 @@ class BattleBot(commands.Bot):
                                    "cogs.info",
                                    "cogs.joinleave",
                                    "cogs.links",
-                                   "cogs.misc",
+                                   #"cogs.misc",
                                    "cogs.modlog",
                                    "cogs.options",
                                    "cogs.owner",
