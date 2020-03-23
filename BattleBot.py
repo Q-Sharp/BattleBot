@@ -24,7 +24,7 @@ class BattleBot(commands.Bot):
                                    "cogs.info",
                                    "cogs.joinleave",
                                    "cogs.links",
-                                   #"cogs.misc",
+                                   "cogs.misc",
                                    "cogs.modlog",
                                    "cogs.options",
                                    "cogs.owner",

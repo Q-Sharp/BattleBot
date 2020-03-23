@@ -52,13 +52,13 @@ class Clans(commands.Cog):
                         value = clan["Info"]["description"],
                         inline = False)
         page1.add_field(name = "Members",
-                        value = f"{len(clan['Members']['commanderIDs']}/50",
+                        value = f"{len(clan['Members']['commanderIDs'])}/50",
                         inline = False)
         page1.add_field(name = "Location",
                         value = clan["Info"]['location'],
                         inline = False)
         page1.add_field(name = "Capacity",
-                        value = f"{len(clan['Members']['commanderIDs']}/50",
+                        value = f"{len(clan['Members']['commanderIDs'])}/50",
                         inline = False)
         page1.add_field(name = "Days since creation",
                         value = f"{int((time.time() - clan['Info']['creationTime']) / (60 * 60 * 24))} days",
