@@ -238,7 +238,6 @@ class Profiles(commands.Cog):
                 try:
                     reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=lambda r, u: u.id == ctx.author.id and u.bot == False)
                 except asyncio.TimeoutError:
-                    ctx.send("No reaction!")
                     return
 
                 userids = list()
