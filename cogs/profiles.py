@@ -220,9 +220,13 @@ class Profiles(commands.Cog):
                 i = 1
 
                 for userid in userids:
+                    try:
+                        player = profiles[str(userid)]
+                    except:
+                        continue
+                
                     user = await self.bot.fetch_user(userid)
-                    player = profiles[str(userid)]
-
+                    
                     reactionString = str(get_reaction(i))
 
                     selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
