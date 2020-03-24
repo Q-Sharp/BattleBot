@@ -220,9 +220,13 @@ class Profiles(commands.Cog):
                 i = 1
 
                 for userid in userids:
+                    try:
+                        player = profiles[str(userid)]
+                    except:
+                        continue
+                
                     user = await self.bot.fetch_user(userid)
-                    player = profiles[str(userid)]
-
+                    
                     reactionString = str(get_reaction(i))
 
                     selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
@@ -234,7 +238,6 @@ class Profiles(commands.Cog):
                 try:
                     reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=lambda r, u: u.id == ctx.author.id and u.bot == False)
                 except asyncio.TimeoutError:
-                    ctx.send("No reaction!")
                     return
 
                 userids = list()
