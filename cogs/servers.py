@@ -97,28 +97,18 @@ class Servers(commands.Cog):
     
     @commands.has_permissions(manage_channels=True)
     @server.command(name = 'modlod', aliases = ['ml'])
-    async def modlogMessages(self, ctx, value:str = None, channel = None):
+    async def modlogMessages(self, ctx, channel = None):
         """
-        Enabled/disables the modlog and specifies which channel to send it to.
-
-        Valid values:
-        `[y/yes/enable/on]` - Enables the modlog.
-        `[n/no/disable/off]` - Disables the modlog.
-
-        Please mention the channel to select it. You will have to specify a channel when re-enabling.
+        Enabled/disables the modlog by specifying (or not specifying) which channel to send it to.
         """
-
-        if value not in ['y','yes','enable','on','n','no','disable','off']:
-            await ctx.send(""" That's not a valid setting. Please use one of the following:
-`[y/yes/enable/on]` - Enables the modlog.
-`[n/no/disable/off]` - Disables the modlog.""")
-            return
 
         servers = data_handler.load("servers")
-        if value in ['n','no','disable','off']:
+
+        try:
+            channel = await commands.TextChannelConverter().convert(ctx,channel)
+            servers[str(ctx.guild.id)]['Modlog']['channel'] = (channel).id
+        except TypeError or KeyError:
             servers[str(ctx.guild.id)]['Modlog']['channel'] = None
-        elif value in ['y','yes','enable','on']:
-            servers[str(ctx.guild.id)]['Modlog']['channel'] = (await commands.TextChannelConverter().convert(ctx,channel)).id
 
         data_handler.dump(servers, "servers")
         await ctx.send("Modlog updated.")
@@ -126,7 +116,7 @@ class Servers(commands.Cog):
 
     @commands.has_permissions(manage_channels=True)
     @server.command(name = 'rankupmessages', aliases = ['rum', 'rm', 'rankUpMessages', 'rums', 'RankUpMessages', 'rankupmessage'])
-    async def rankUpMessages(self, ctx, value:str = None, channel = None):
+    async def rankUpMessages(self, ctx, channel = None):
         """
         Changes where rank up messages go.
 
@@ -151,7 +141,7 @@ class Servers(commands.Cog):
                 servers[str(ctx.guild.id)]['Messages']['rankUpChannel'] = servers[str(ctx.guild.id)]['Messages']['rankUpChannel'].id
                 servers[str(ctx.guild.id)]['Messages']['rankUpMessages'] = "channel"
             except:
-                await ctx.send("Please select a vaid channel.")
+                await ctx.send("Please select a vaid channel or leave it blank.")
                 return
 
         data_handler.dump(servers, "servers")
