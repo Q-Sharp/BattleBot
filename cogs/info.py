@@ -83,6 +83,8 @@ class Info(commands.Cog):
                         value="https://discordapp.com/oauth2/authorize?client_id=612344319323537458&permissions=67501120&scope=bot")
         embed.add_field(name="Join my support server and test out new commands!",
                         value="https://discord.gg/FkpUHNK")
+        embed.add_field(name="Check my source code and contribute on Github.",
+                        value="https://github.com/Greenfoot5/BattleBot")
 
         await ctx.send(content="",embed=embed)
 
