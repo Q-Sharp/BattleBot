@@ -198,21 +198,20 @@ class Profiles(commands.Cog):
                 if foundUserName in profiles[profil]['Base']['username']:
                   userids.append(int(profil))
 
-
-        profiles = data_handler.load("profiles")
-
         # distinct result list
         userids = list(OrderedDict.fromkeys(userids))
 
         # filter out userids without existing user profile
-        tempUserids = list()
-        for userid in userids:
+        if userName is not None:
+            tempUserids = list()
+            for userid in userids:
                 try:
                     player = profiles[str(userid)]
-                    tempUserids.append(userid)
                 except:
                     continue
-        userids = tempUserids
+                tempUserids.append(userid)
+        
+            userids = tempUserids
 
         if len(userids) <= 0:
             await ctx.send("I don't know that Discord User/profile")
