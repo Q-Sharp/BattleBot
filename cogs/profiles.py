@@ -201,6 +201,18 @@ class Profiles(commands.Cog):
         # distinct result list
         userids = list(OrderedDict.fromkeys(userids))
 
+        # filter out userids without existing user profile
+        if userName is not None:
+            tempUserids = list()
+            for userid in userids:
+                try:
+                    player = profiles[str(userid)]
+                except:
+                    continue
+                tempUserids.append(userid)
+        
+            userids = tempUserids
+
         if len(userids) <= 0:
             await ctx.send("I don't know that Discord User/profile")
             return
@@ -210,8 +222,6 @@ class Profiles(commands.Cog):
             return
 
         if len(userids) > 1 and userName is not None:
-                profiles = data_handler.load("profiles")
-
                 selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
                 selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
 
@@ -220,11 +230,7 @@ class Profiles(commands.Cog):
                 i = 1
 
                 for userid in userids:
-                    try:
-                        player = profiles[str(userid)]
-                    except:
-                        continue
-                
+                    player = profiles[str(userid)]
                     user = await self.bot.fetch_user(userid)
                     
                     reactionString = str(get_reaction(i))
