@@ -96,7 +96,7 @@ class Servers(commands.Cog):
 
     
     @commands.has_permissions(manage_channels=True)
-    @server.command(name = 'modlod', aliases = ['ml'])
+    @server.command(name = 'modlog', aliases = ['ml'])
     async def modlogMessages(self, ctx, channel = None):
         """
         Enabled/disables the modlog by specifying (or not specifying) which channel to send it to.
@@ -116,7 +116,7 @@ class Servers(commands.Cog):
 
     @commands.has_permissions(manage_channels=True)
     @server.command(name = 'rankupmessages', aliases = ['rum', 'rm', 'rankUpMessages', 'rums', 'RankUpMessages', 'rankupmessage'])
-    async def rankUpMessages(self, ctx, channel = None):
+    async def rankUpMessages(self, ctx, value:str=None, channel = None):
         """
         Changes where rank up messages go.
 

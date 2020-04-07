@@ -220,7 +220,7 @@ class Subscriptions(commands.Cog):
                     message = f"**{ctx.author.name}#{ctx.author.discriminator}:**\n"
                 # If the content isn't empty, add the user's name and quote them.
                 else:
-                    message = f"**{ctx.author.name}#{ctx.author.discriminator}:**\n>>> {ctx.content}"
+                    message = f"**{ctx.author.name}#{ctx.author.discriminator}:**\n>>> {ctx.clean_content}"
                 
                 # Check if the message has any embeds.
                 if len(ctx.embeds) == 0:
@@ -236,9 +236,6 @@ class Subscriptions(commands.Cog):
                     files.append(theFile)
                 if files == []:
                     files = None
-
-                # Escapes mentions so we don't mention everyone if we don't need to.
-                message = discord.utils.escape_mentions(message)
 
                 # Try sending the now formatted message.
                 try:
