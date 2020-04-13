@@ -277,6 +277,10 @@ class Profiles(commands.Cog):
             player = profiles[str(ctx.author.id)]
             attribute = attribute.lower()
 
+            if attribute in ['colour', 'color', 'colours', 'colors']:
+                await self.changeProfileColour(ctx, int(value))
+                return
+
             if attribute in ["lords", "lord"]:
                 if str(value)[0] == "+":
                     player['Achievements']['lords'] += int(value)
@@ -304,7 +308,8 @@ class Profiles(commands.Cog):
             elif attribute in ["name", "accountname", "account", "username"]:
                 player['Base']['username'] = value
             else:
-                await ctx.send("This is not a valid setting. Check your profile for valid settings.")
+                await ctx.send("This is not a valid setting.  You can change: " +
+                               "`username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.")
                 return
         except ValueError:
             await ctx.send("Invalid Value. Please choose a number.")
