@@ -271,7 +271,7 @@ class Profiles(commands.Cog):
         try:
             """
             Change values on your profile. You can change:
-            `username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.
+            `username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`, `colour`.
             """
             profiles = data_handler.load("profiles")
             player = profiles[str(ctx.author.id)]
@@ -309,7 +309,7 @@ class Profiles(commands.Cog):
                 player['Base']['username'] = value
             else:
                 await ctx.send("This is not a valid setting.  You can change: " +
-                               "`username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`.")
+                               "`username`, `clan`, `country`, `lords`, `squires`, `rating`, `unit`, `tactic`, `tome`, `skin`, `colour`.")
                 return
         except ValueError:
             await ctx.send("Invalid Value. Please choose a number.")
