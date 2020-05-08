@@ -177,24 +177,21 @@ class Profiles(commands.Cog):
         profiles = data_handler.load("profiles")
         userids = list()
 
-        # if user wants to display his own profile, display only his own.
         if userName is None:
-            findThisUserName = ctx.author.name
+            # if user wants to display his own profile, display only his own.
+            userids.append(ctx.message.author.id)
         else:
-            findThisUserName = userName
-
-        if userName is not None:
-            users = list(filter(lambda u: findThisUserName in u.name, self.bot.users))
+            users = list(filter(lambda u: userName in u.name, self.bot.users))
             for user in users:
                 userids.append(user.id)
 
             for guild in self.bot.guilds:
-                members = list(filter(lambda m: findThisUserName in m.display_name, guild.members))
+                members = list(filter(lambda m: userName in m.display_name, guild.members))
                 for member in members:
                     userids.append(member.id)
 
             for profil in profiles:
-                if findThisUserName in profiles[profil]['Base']['username']:
+                if userName in profiles[profil]['Base']['username']:
                   userids.append(int(profil))
 
             # distinct result list
@@ -205,20 +202,14 @@ class Profiles(commands.Cog):
             for userid in userids:
                 try:
                     player = profiles[str(userid)]
+                    if config.rp_showHistoricProfiles == False:
+                        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
+                    tempUserids.append(userid)
                 except:
                     continue
 
-                if config.rp_showHistoricProfiles == False:
-                    try:
-                        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
-                    except:
-                        continue
-
-                tempUserids.append(userid)
-        
             userids = tempUserids
-        else:
-            userids.append(ctx.message.author.id)
+            
 
         if len(userids) <= 0:
             await ctx.send("I don't know that Discord User/profile")
@@ -229,48 +220,48 @@ class Profiles(commands.Cog):
             return
 
         if len(userids) > 1:
-                selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
-                selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
+            # more then 1 possilbe profile found, let the user decide which should be shown
+            selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
+            selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
 
-                selection = await ctx.send(embed=selectionpage)
-                foundUser = list()
-                i = 1
+            selection = await ctx.send(embed=selectionpage)
+            foundUser = list()
+            i = 1
 
-                for userid in userids:
-                    player = profiles[str(userid)]
-                    user = await self.bot.fetch_user(userid)
-                    
-                    reactionString = str(get_reaction(i))
+            for userid in userids:
+                player = profiles[str(userid)]
+                user = await self.bot.fetch_user(userid)
+                reactionString = str(get_reaction(i))
 
-                    selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
-                    foundUser.append(userid)
-                    await selection.add_reaction(reactionString)
-                    i += 1
+                selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
+                foundUser.append(userid)
+                await selection.add_reaction(reactionString)
+                i += 1
 
-                await selection.edit(embed=selectionpage)
-                try:
-                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=lambda r, u: u.id == ctx.author.id and u.bot == False)
-                except asyncio.TimeoutError:
-                    return
+            await selection.edit(embed=selectionpage)
+            try:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=lambda r, u: u.id == ctx.author.id and u.bot == False)
+            except asyncio.TimeoutError:
+                return
 
-                userids = list()
-                userids.append(foundUser[int(get_reaction(0, str(reaction))) - 1])
+            userid = foundUser[int(get_reaction(0, str(reaction))) - 1]
               
-        tasklist = list()
-        for userid in userids:
-            page1 = await get_page(self, ctx, 1, userid)
-            page2 = await get_page(self, ctx, 2, userid)
-            page3 = await get_page(self, ctx, 3, userid)
-            pages = [page1, page2, page3]
+        
+        # display profile of found user
+        page1 = await get_page(self, ctx, 1, userid)
+        page2 = await get_page(self, ctx, 2, userid)
+        page3 = await get_page(self, ctx, 3, userid)
+        pages = [page1, page2, page3]
 
-            message = await ctx.send(embed=page1)
-            await message.add_reaction("⏪")
-            await message.add_reaction("◀")
-            await message.add_reaction("⏺️")
-            await message.add_reaction("▶")
-            await message.add_reaction("⏩")
-            
-            tasklist.append(asyncio.create_task(handle_reactions(self, ctx, userid, pages, page1, message)))
+        message = await ctx.send(embed=page1)
+        await message.add_reaction("⏪")
+        await message.add_reaction("◀")
+        await message.add_reaction("⏺️")
+        await message.add_reaction("▶")
+        await message.add_reaction("⏩")
+        
+        # tasklist.append(asyncio.create_task(handle_reactions(self, ctx, userid, pages, page1, message)))
+        await handle_reactions(self, ctx, userid, pages, page1, message)
 
 
     @profile.command(name="set")
