@@ -179,15 +179,13 @@ class Profiles(commands.Cog):
 
         if userName is None:
             # if user wants to display his own profile, display only his own.
-            userids.append(ctx.message.author.id)
+            userid = ctx.message.author.id
         else:
-            users = list(filter(lambda u: userName in u.name, self.bot.users))
-            for user in users:
+            for user in list(filter(lambda u: userName in u.name, self.bot.users)):
                 userids.append(user.id)
 
             for guild in self.bot.guilds:
-                members = list(filter(lambda m: userName in m.display_name, guild.members))
-                for member in members:
+                for member in list(filter(lambda m: userName in m.display_name, guild.members)):
                     userids.append(member.id)
 
             for profil in profiles:
@@ -209,44 +207,46 @@ class Profiles(commands.Cog):
                     continue
 
             userids = tempUserids
-            
 
-        if len(userids) <= 0:
-            await ctx.send("I don't know that Discord User/profile")
-            return
-
-        if len(userids) > 10:
-            await ctx.send("I found more than 10 matching profiles. Please be more specific.")
-            return
-
-        if len(userids) > 1:
-            # more then 1 possilbe profile found, let the user decide which should be shown
-            selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
-            selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
-
-            selection = await ctx.send(embed=selectionpage)
-            foundUser = list()
-            i = 1
-
-            for userid in userids:
-                player = profiles[str(userid)]
-                user = await self.bot.fetch_user(userid)
-                reactionString = str(get_reaction(i))
-
-                selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
-                foundUser.append(userid)
-                await selection.add_reaction(reactionString)
-                i += 1
-
-            await selection.edit(embed=selectionpage)
-            try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=lambda r, u: u.id == ctx.author.id and u.bot == False)
-            except asyncio.TimeoutError:
+            if len(userids) <= 0:
+                await ctx.send("I don't know that Discord User/profile")
                 return
 
-            userid = foundUser[int(get_reaction(0, str(reaction))) - 1]
-              
-        
+            if len(userids) > 10:
+                await ctx.send("I found more than 10 matching profiles. Please be more specific.")
+                return
+
+            if len(userids) > 1:
+                # more then 1 possilbe profile found, let the user decide which should be shown
+                selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
+                selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
+
+                selection = await ctx.send(embed=selectionpage)
+                foundUser = list()
+                i = 1
+
+                for userid in userids:
+                    player = profiles[str(userid)]
+                    user = await self.bot.fetch_user(userid)
+                    reactionString = str(get_reaction(i))
+
+                    selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
+                    foundUser.append(userid)
+                    await selection.add_reaction(reactionString)
+                    i += 1
+
+                await selection.edit(embed=selectionpage)
+                try:
+                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=lambda r, u: u.id == ctx.author.id and u.bot == False)
+                except asyncio.TimeoutError:
+                    return
+
+                # show the profile of this id:
+                userid = foundUser[int(get_reaction(0, str(reaction))) - 1]
+            else:
+                userid = userids[0]
+
+            
         # display profile of found user
         page1 = await get_page(self, ctx, 1, userid)
         page2 = await get_page(self, ctx, 2, userid)
@@ -260,7 +260,6 @@ class Profiles(commands.Cog):
         await message.add_reaction("▶")
         await message.add_reaction("⏩")
         
-        # tasklist.append(asyncio.create_task(handle_reactions(self, ctx, userid, pages, page1, message)))
         await handle_reactions(self, ctx, userid, pages, page1, message)
 
 
