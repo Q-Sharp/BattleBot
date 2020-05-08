@@ -77,17 +77,16 @@ async def get_page(self, ctx, number, userid):
                         value = f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
                         inline = False)
     
-    if number == 3:
+    if number == 3 and userid is not None:
         # Page 3
-        try:
-            member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
-            days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)
+        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds)
+        if member is not None:
+            member = member.get_member(userid)
+            days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/ 86400)
             discord_date = f"{member.created_at.ctime()} ({days} days ago)"
-    
+        
             page.add_field(name = "Discord Info",
-                           value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
-        except:
-            page.add_field()
+                       value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
 
     return page
 
@@ -180,38 +179,46 @@ class Profiles(commands.Cog):
 
         # if user wants to display his own profile, display only his own.
         if userName is None:
-            foundUserName = ctx.author.name
+            findThisUserName = ctx.author.name
         else:
-            foundUserName = userName
-
-        users = list(filter(lambda u: foundUserName in u.name, self.bot.users))
-        for user in users:
-            userids.append(user.id)
+            findThisUserName = userName
 
         if userName is not None:
+            users = list(filter(lambda u: findThisUserName in u.name, self.bot.users))
+            for user in users:
+                userids.append(user.id)
+
             for guild in self.bot.guilds:
-                members = list(filter(lambda m: foundUserName in m.display_name, guild.members))
+                members = list(filter(lambda m: findThisUserName in m.display_name, guild.members))
                 for member in members:
                     userids.append(member.id)
 
             for profil in profiles:
-                if foundUserName in profiles[profil]['Base']['username']:
+                if findThisUserName in profiles[profil]['Base']['username']:
                   userids.append(int(profil))
 
-        # distinct result list
-        userids = list(OrderedDict.fromkeys(userids))
+            # distinct result list
+            userids = list(OrderedDict.fromkeys(userids))
 
-        # filter out userids without existing user profile
-        if userName is not None:
+            # filter out userids without existing user profile
             tempUserids = list()
             for userid in userids:
                 try:
                     player = profiles[str(userid)]
                 except:
                     continue
+
+                if config.rp_showHistoricProfiles == False:
+                    try:
+                        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
+                    except:
+                        continue
+
                 tempUserids.append(userid)
         
             userids = tempUserids
+        else:
+            userids.append(ctx.message.author.id)
 
         if len(userids) <= 0:
             await ctx.send("I don't know that Discord User/profile")
@@ -221,7 +228,7 @@ class Profiles(commands.Cog):
             await ctx.send("I found more than 10 matching profiles. Please be more specific.")
             return
 
-        if len(userids) > 1 and userName is not None:
+        if len(userids) > 1:
                 selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
                 selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
 
