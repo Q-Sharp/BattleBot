@@ -188,9 +188,9 @@ class Profiles(commands.Cog):
                 for member in list(filter(lambda m: userName in m.display_name, guild.members)):
                     userids.append(member.id)
 
-            for profil in profiles:
-                if userName in profiles[profil]['Base']['username']:
-                  userids.append(int(profil))
+            for profile in profiles:
+                if userName in profiles[profile]['Base']['username']:
+                  userids.append(int(profile))
 
             # distinct result list
             userids = list(OrderedDict.fromkeys(userids))
