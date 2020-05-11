@@ -77,17 +77,16 @@ async def get_page(self, ctx, number, userid):
                         value = f"Favourite unit: {player['Favourites']['unit']} \nFavourite Tactic: {player['Favourites']['tactic']} \nFavourite Tome: {player['Favourites']['tome']} \nFavourite Skin: {player['Favourites']['skin']}",
                         inline = False)
     
-    if number == 3:
+    if number == 3 and userid is not None:
         # Page 3
-        try:
-            member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
-            days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/86400)
+        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds)
+        if member is not None:
+            member = member.get_member(userid)
+            days = int(int(time.time() - (member.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())/ 86400)
             discord_date = f"{member.created_at.ctime()} ({days} days ago)"
-    
+        
             page.add_field(name = "Discord Info",
-                           value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
-        except:
-            page.add_field()
+                       value = f"Joined Discord on: {discord_date} \nStatus: {member.status} \nid: `{member.id}` \nAvatar Link: {member.avatar_url_as(format='png')}")
 
     return page
 
@@ -178,50 +177,47 @@ class Profiles(commands.Cog):
         profiles = data_handler.load("profiles")
         userids = list()
 
-        # if user wants to display his own profile, display only his own.
         if userName is None:
-            foundUserName = ctx.author.name
+            # if user wants to display his own profile, display only his own.
+            userid = ctx.message.author.id
         else:
-            foundUserName = userName
+            for user in list(filter(lambda u: userName in u.name, self.bot.users)):
+                userids.append(user.id)
 
-        users = list(filter(lambda u: foundUserName in u.name, self.bot.users))
-        for user in users:
-            userids.append(user.id)
-
-        if userName is not None:
             for guild in self.bot.guilds:
-                members = list(filter(lambda m: foundUserName in m.display_name, guild.members))
-                for member in members:
+                for member in list(filter(lambda m: userName in m.display_name, guild.members)):
                     userids.append(member.id)
 
-            for profil in profiles:
-                if foundUserName in profiles[profil]['Base']['username']:
-                  userids.append(int(profil))
+            for profile in profiles:
+                if userName in profiles[profile]['Base']['username']:
+                  userids.append(int(profile))
 
-        # distinct result list
-        userids = list(OrderedDict.fromkeys(userids))
+            # distinct result list
+            userids = list(OrderedDict.fromkeys(userids))
 
-        # filter out userids without existing user profile
-        if userName is not None:
+            # filter out userids without existing user profile
             tempUserids = list()
             for userid in userids:
                 try:
                     player = profiles[str(userid)]
+                    if config.rp_showHistoricProfiles == False:
+                        member = discord.utils.find(lambda g: g.get_member(userid), self.bot.guilds).get_member(userid)
+                    tempUserids.append(userid)
                 except:
                     continue
-                tempUserids.append(userid)
-        
+
             userids = tempUserids
 
-        if len(userids) <= 0:
-            await ctx.send("I don't know that Discord User/profile")
-            return
+            if len(userids) <= 0:
+                await ctx.send("I don't know that Discord User/profile")
+                return
 
-        if len(userids) > 10:
-            await ctx.send("I found more than 10 matching profiles. Please be more specific.")
-            return
+            if len(userids) > 10:
+                await ctx.send("I found more than 10 matching profiles. Please be more specific.")
+                return
 
-        if len(userids) > 1 and userName is not None:
+            if len(userids) > 1:
+                # more then 1 possilbe profile found, let the user decide which should be shown
                 selectionpage = discord.Embed(title = "I found more than one matching profile. Please select the correct one:", description = "")
                 selectionpage.set_footer(text = f"Requested by {ctx.author.display_name}", icon_url = ctx.author.avatar_url_as(static_format='png'))
 
@@ -232,7 +228,6 @@ class Profiles(commands.Cog):
                 for userid in userids:
                     player = profiles[str(userid)]
                     user = await self.bot.fetch_user(userid)
-                    
                     reactionString = str(get_reaction(i))
 
                     selectionpage.add_field(name = f"{reactionString}", value = f"{user.name}#{user.discriminator} - Account Name: {player['Base']['username']}", inline = False)
@@ -246,24 +241,26 @@ class Profiles(commands.Cog):
                 except asyncio.TimeoutError:
                     return
 
-                userids = list()
-                userids.append(foundUser[int(get_reaction(0, str(reaction))) - 1])
-              
-        tasklist = list()
-        for userid in userids:
-            page1 = await get_page(self, ctx, 1, userid)
-            page2 = await get_page(self, ctx, 2, userid)
-            page3 = await get_page(self, ctx, 3, userid)
-            pages = [page1, page2, page3]
+                # show the profile of this id:
+                userid = foundUser[int(get_reaction(0, str(reaction))) - 1]
+            else:
+                userid = userids[0]
 
-            message = await ctx.send(embed=page1)
-            await message.add_reaction("⏪")
-            await message.add_reaction("◀")
-            await message.add_reaction("⏺️")
-            await message.add_reaction("▶")
-            await message.add_reaction("⏩")
             
-            tasklist.append(asyncio.create_task(handle_reactions(self, ctx, userid, pages, page1, message)))
+        # display profile of found user
+        page1 = await get_page(self, ctx, 1, userid)
+        page2 = await get_page(self, ctx, 2, userid)
+        page3 = await get_page(self, ctx, 3, userid)
+        pages = [page1, page2, page3]
+
+        message = await ctx.send(embed=page1)
+        await message.add_reaction("⏪")
+        await message.add_reaction("◀")
+        await message.add_reaction("⏺️")
+        await message.add_reaction("▶")
+        await message.add_reaction("⏩")
+        
+        await handle_reactions(self, ctx, userid, pages, page1, message)
 
 
     @profile.command(name="set")
