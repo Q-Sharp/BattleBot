@@ -81,8 +81,8 @@ class Info(commands.Cog):
                         inline = False)
         embed.add_field(name="Invite me to your server!",
                         value="https://discordapp.com/oauth2/authorize?client_id=612344319323537458&permissions=67501120&scope=bot")
-        embed.add_field(name="Join my support server and test out new commands!",
-                        value="https://discord.gg/FkpUHNK")
+        embed.add_field(name="Join the Battle Legion Community server to get the latest updates!!",
+                        value="https://discord.gg/YahVdmm")
         embed.add_field(name="Check my source code and contribute on Github.",
                         value="https://github.com/Greenfoot5/BattleBot")
 

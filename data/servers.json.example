@@ -1,15 +1,15 @@
 {
-    "612349447413694524": {
+    "565170864128000000": {
         "Base": {
             "Type": "Community"
         },
         "Messages": {
-            "joinChannel": 678742300670689320,
+            "joinChannel": 565170864128000002,
             "joinMessages": {
-                "ExampleJoin": "{member_name} has joined the server! They created their account at {created}.\n\nHey {member_mention}, you are the {position}th person to join this server!\n\nMake sure to check out <#612349448101822465> for details on the server and the bot.\nYou can also check out <#612360431985491969> for the latest info on the bot!",
+                "ExampleJoin": "{member_name} has joined the server! They created their account at {created}.\n\nHey {member_mention}, you are the {position}th person to join this server!\n\nMake sure to check out <#565172414116397056> for details on the server.\nYou can also check out <#565172556559024158> for the latest updates on the server!",
                 "Swoosh": "Swoosh! Here come\u2019s in {member_mention} at number {position}! Welcome!"
             },
-            "leaveChannel": 678742300670689320,
+            "leaveChannel": 565170864128000002,
             "leaveMessages": {
                 "RIP": "RIP {member_name}. We'll miss you!",
                 "ExampleLeave": "{member_name} may have made their account only on {created} at #{position} but the were a true members of the server since {join_date}. They will be throughly missed!"
@@ -19,7 +19,7 @@
             "rankUpChannel": null
         },
         "Modlog": {
-            "channel": 613800534750789642
+            "channel": 615590516146307102
         }
     },
     "573978972170354688": {

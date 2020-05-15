@@ -60,7 +60,7 @@ def clan_rank_requirement(rank):
     return commands.check(predicate)
 
 # Checks user has the requied minimum rank.
-def user_rank_requirement(permission):
+def user_permission_requirement(permission):
     async def predicate(ctx):
         profiles = data_handler.load("profiles")
         try:
