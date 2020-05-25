@@ -424,40 +424,49 @@ class Profiles(commands.Cog):
         data_handler.dump(profiles, "profiles")
 
     @profile.group(name="leaderboard", aliases=["lb"], invoke_without_command = True)
-    async def levelLB(self, ctx, member: discord.Member = None):
+    async def levelLB(self, ctx, page: int = 1):
         """
         Check where people are relative to each other! Not specifying a page will select the first page.
         """
+        if page < 1:
+            await ctx.send("That isn't a valid page.")
+            return
+
         # Sort the dictionary into a list.
-        member = member or ctx.author
         profiles = data_handler.load("profiles")
         rankings = []
         description = ""
+
         for player in profiles:
             try:
                 rankings.append({'id': player, 'rp': profiles[player]['Level']['rp']})
             except KeyError:
                 pass
 
+        if page > ((len(rankings) // 10) + 1):
+            await ctx.send("That page is too large.")
+            return
+
         def getKey(item):
            return item['rp']
 
         rankings = sorted(rankings, reverse = True, key = getKey)
 
-        # Add the top 5
-        end = 5
-        if len(rankings) < 5:
+        # Add the top 10
+        end = 10 * page
+        if len(rankings) < (10 * page):
             end = len(rankings)
-        for i in range(end):
+        for i in range((page * 10) - 10, end):
             user = await ctx.bot.fetch_user(rankings[i]['id'])
             description += f"**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points.\n"
 
         # Add member
         index = -1
+        print(rankings)
         for i in range(len(rankings)):
-            if rankings[i]['id'] == member.id:
+            if int(rankings[i]['id']) == ctx.author.id:
                 index = i
-        if index <= 4:
+        if index <= (end) and index >= (end - 10):
             embed = discord.Embed(title="Global rank point leaderboard",
                                   colour=discord.Colour(0xa72693),
                                   description=description,
@@ -467,10 +476,10 @@ class Profiles(commands.Cog):
             await ctx.send(content="Here you go!", embed=embed)
             return
         description += "--==ME==--"
-        for i in [index - 1, index, index + 1]:
+        for i in [index - 2, index - 1, index, index + 1, index + 2]:
             if i != len(rankings):
                 user = await ctx.bot.fetch_user(rankings[i]['id'])
-                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['Level']['rp']} rank points."
+                description += f"\n**{i + 1}.** {user.name}#{user.discriminator} - {rankings[i]['rp']} rank points."
 
         embed = discord.Embed(title="Rank leaderboard",
                               colour=discord.Colour(0xa72693),
