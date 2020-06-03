@@ -1,16 +1,27 @@
 import json
+import threading
+
+global_lock = threading.Lock()
 
 class data_handler():
     @staticmethod
     def load(file):
         try:
-            return json.load(open(f"data/{file}.json"))
+            with open(f"data/{file}.json", 'r') as f:
+                return json.load(f)
         except:
             return None
 
     @staticmethod
     def dump(data, file):
         try:
-            json.dump(data, open(f"data/{file}.json", 'w'), indent = 4)
+            while global_lock.locked():
+                continue
+
+            global_lock.acquire()
+            with open(f"data/{file}.json", 'w') as f:
+                json.dump(data, f, indent = 4)
         except:
             raise
+        finally:
+            global_lock.release()
