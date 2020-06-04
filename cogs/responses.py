@@ -82,3 +82,4 @@ Hopefully these counters help you win. If you're still struggling, ask for help,
 # Sets up the cog. Called when loading the file
 def setup(bot):
     bot.add_cog(Responses(bot))
+    
