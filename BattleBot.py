@@ -29,6 +29,7 @@ class BattleBot(commands.Bot):
                                    "cogs.options",
                                    "cogs.owner",
                                    "cogs.profiles",
+                                   "cogs.responses",
                                    "cogs.servers",
                                    "cogs.subscriptions"]
             
