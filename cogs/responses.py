@@ -71,7 +71,7 @@ This is because the ranking system was changed. Traplight are currently trying t
 • AoE units. Units like Earth Elemental, Faceless Knights, Brute are all great counters as they deal AoE damage to the swarm.
 • Hammer Throwers > Archers. Their projectile is far superior and will miss much less than archers. (May not be true against other squads though)
 • Spires and bombs also work. Spires can target multiple units and bombs deal massive AoE damage in one go.
-• Thornguards (+ drummer) will destroy most of a incoming swarm.
+• Thornguards (+ drummer) will destroy most of an incoming swarm.
 Hopefully these counters help you win. If you're still struggling, ask for help, people like to help others.""")
 
     @responseBase.command(name="pinned", aliases=["pins", "pin"])
