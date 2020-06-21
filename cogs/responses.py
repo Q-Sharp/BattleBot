@@ -68,10 +68,10 @@ This is because the ranking system was changed. Traplight are currently trying t
         "If someone's complaining about Death Knight being OP, send them this."
         await ctx.send("""Death Knight is powerful, but only because it brings forth a whole different style of play that people aren't expecting, or knowledgeable about. Here's some things you can do to help win:
 • Use a drummer. The #1 piece of advice. Swarms (those that use DK) rely on melee damage to win. If you use a drummer, you heavily reduce the melee damage they deal.
+• An incoming swarm will get rekt by Thornguards (+ drummer). TG have high health and they reflect damage back to the attacker. Swarm units usually do much damage and have low health.
 • AoE units. Units like Earth Elemental, Faceless Knights, Brute are all great counters as they deal AoE damage to the swarm.
 • Hammer Throwers > Archers. Their projectile is far superior and will miss much less than archers. (May not be true against other squads though)
 • Spires and bombs also work. Spires can target multiple units and bombs deal massive AoE damage in one go.
-• Thornguards (+ drummer) will destroy most of an incoming swarm.
 Hopefully these counters help you win. If you're still struggling, ask for help, people like to help others.""")
 
     @responseBase.command(name="pinned", aliases=["pins", "pin"])
