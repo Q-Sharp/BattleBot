@@ -198,12 +198,12 @@ class Subscriptions(commands.Cog):
     # If it's a valid subscripion, send that message to all the other servers.
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        # Obtains the relebent data.
-        subs = data_handler.load("subscriptions")
-
-        # Stops a chain response.
+       # Stops a chain response.
         if self.bot.user.id == ctx.author.id:
             return
+
+        # Obtains the relevent data.
+        subs = data_handler.load("subscriptions")
 
         # Creates a list of ids of valid subscriptions
         channels = list(subs["Subscriptions"].values())
@@ -254,12 +254,12 @@ class Subscriptions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
-        # Obtains the relebent data.
-        subs = data_handler.load("subscriptions")
-
         # Stops a chain response.
         if self.bot.user.id == before.author.id:
             return
+
+        # Obtains the relevent data.
+        subs = data_handler.load("subscriptions")
 
         # Creates a list of ids of valid subscriptions
         channels = list(subs["Subscriptions"].values())
@@ -309,12 +309,12 @@ class Subscriptions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, ctx):
-        # Obtains the relebent data.
-        subs = data_handler.load("subscriptions")
-
         # Stops a chain response.
         if self.bot.user.id == ctx.author.id:
             return
+
+        # Obtains the relevent data.
+        subs = data_handler.load("subscriptions")
 
         # Creates a list of ids of valid subscriptions
         channels = list(subs["Subscriptions"].values())
