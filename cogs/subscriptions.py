@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 from data.data_handler import data_handler
+import datetime
 
 class Subscriptions(commands.Cog):
 
@@ -123,7 +124,7 @@ class Subscriptions(commands.Cog):
             return
         
         # Gets the permissions for the channel
-        permissions = channel.permissions_for(channel.guild.get_member(self.bot.user.id))
+        permissions = channel.permissions_for(self.bot.user)
 
         # Checks we have permissions to send messages, send embeds and send attachments (so we can correctly forward messages)
         if not permissions.send_messages or not permissions.embed_links or not permissions.attach_files:
@@ -197,7 +198,11 @@ class Subscriptions(commands.Cog):
     # If it's a valid subscripion, send that message to all the other servers.
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        # Obtains the relebent data.
+       # Stops a chain response.
+        if self.bot.user.id == ctx.author.id:
+            return
+
+        # Obtains the relevent data.
         subs = data_handler.load("subscriptions")
 
         # Creates a list of ids of valid subscriptions
@@ -220,7 +225,10 @@ class Subscriptions(commands.Cog):
                     message = f"**{ctx.author.name}#{ctx.author.discriminator}:**\n"
                 # If the content isn't empty, add the user's name and quote them.
                 else:
-                    message = f"**{ctx.author.name}#{ctx.author.discriminator}:**\n>>> {ctx.clean_content}"
+                    if channel.permissions_for(channel.guild.me).mention_everyone:
+                        message = f"**{ctx.author.name}#{ctx.author.discriminator}:**\n>>> {ctx.content}"
+                    else:
+                        message = f"**{ctx.author.name}#{ctx.author.discriminator}:**\n>>> {ctx.clean_content}"
                 
                 # Check if the message has any embeds.
                 if len(ctx.embeds) == 0:
@@ -243,6 +251,98 @@ class Subscriptions(commands.Cog):
                 # If the bot doesn't have permissions, just ignore it.
                 except discord.Forbidden:
                     pass
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        # Stops a chain response.
+        if self.bot.user.id == before.author.id:
+            return
+
+        # Obtains the relevent data.
+        subs = data_handler.load("subscriptions")
+
+        # Creates a list of ids of valid subscriptions
+        channels = list(subs["Subscriptions"].values())
+        # Check if the channel is in that list of valid subscriptions we just made
+        if before.channel.id in channels:
+
+            # Cycle through the subscibed channels of the subscription
+            for channelID in subs["Subscribers"][str(before.channel.id)]["Channels"]:
+
+                # Get the TextChannel object from the id
+                channel = self.bot.get_channel(channelID)
+
+                dayAgo = datetime.datetime.now() - datetime.timedelta(days=1)
+
+                msg = None
+
+                async for mesg in channel.history(limit = 200, after = dayAgo):
+                    if before.content in mesg.content and mesg.author.id == self.bot.user.id:
+                        msg = mesg
+                # Convert the message so we can output it all correctly.
+                # Checks if it's a system message, if so, output it nicely.
+                if after.is_system():
+                    message = f">>> {after.system_content}"
+                # Checks if the content is empty, if no, just add the author's name.
+                elif after.content == "":
+                    message = f"**{after.author.name}#{after.author.discriminator}:**\n"
+                # If the content isn't empty, add the user's name and quote them.
+                else:
+                    if channel.permissions_for(channel.guild.me).mention_everyone:
+                        message = f"**{after.author.name}#{after.author.discriminator}:**\n>>> {after.content}"
+                    else:
+                        message = f"**{after.author.name}#{after.author.discriminator}:**\n>>> {after.clean_content}"
+                
+                # Check if the message has any embeds.
+                if len(after.embeds) == 0:
+                    embed = None
+                # If it has, add them to the message!
+                else:
+                    embed = after.embeds[0]
+
+                # Try sending the now formatted message.
+                try:
+                    await msg.edit(content=message, embed=embed)
+                # If the bot doesn't have permissions, just ignore it.
+                except discord.Forbidden:
+                    pass
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, ctx):
+        # Stops a chain response.
+        if self.bot.user.id == ctx.author.id:
+            return
+
+        # Obtains the relevent data.
+        subs = data_handler.load("subscriptions")
+
+        # Creates a list of ids of valid subscriptions
+        channels = list(subs["Subscriptions"].values())
+        # Check if the channel is in that list of valid subscriptions we just made
+        if ctx.channel.id in channels:
+
+            # Cycle through the subscibed channels of the subscription
+            for channelID in subs["Subscribers"][str(ctx.channel.id)]["Channels"]:
+
+                # Get the TextChannel object from the id
+                channel = self.bot.get_channel(channelID)
+
+                dayAgo = datetime.datetime.now() - datetime.timedelta(days=1)
+
+                msg = None
+
+                async for mesg in channel.history(limit = 200, after = dayAgo):
+                    if ctx.content in mesg.content and mesg.author.id == self.bot.user.id:
+                        msg = mesg
+
+                # Try sending the now formatted message.
+                try:
+                    await msg.delete()
+                # If the bot doesn't have permissions, just ignore it.
+                except discord.Forbidden:
+                    pass
+
+
 
 # Setup the cog correctly when called to do so.
 def setup(bot):
