@@ -9,6 +9,8 @@ class data_handler():
         try:
             with open(f"data/{file}.json", 'r') as f:
                 return json.load(f)
+        except OSError:
+            return data_handler.__handleMissingFile__(file)
         except:
             return None
 
@@ -25,3 +27,14 @@ class data_handler():
             raise
         finally:
             global_lock.release()
+
+    @staticmethod
+    def __handleMissingFile__(file):
+        try:
+            with open(f"data/{file}.json.example", 'r') as f:
+                example = json.load(f)
+
+            data_handler.dump(example, file)
+            return data_handler.load(file)
+        except:
+            return None
