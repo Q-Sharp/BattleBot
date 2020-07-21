@@ -189,8 +189,8 @@ class Profiles(commands.Cog):
                     userids.append(member.id)
 
             for profile in profiles:
-                if userName in profiles[profile]['Base']['username']:
-                  userids.append(int(profile))
+                if userName.casefold() in profiles[profile]['Base']['username'].casefold():
+                    userids.append(int(profile))
 
             # distinct result list
             userids = list(OrderedDict.fromkeys(userids))
