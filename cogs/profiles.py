@@ -169,7 +169,7 @@ class Profiles(commands.Cog):
 
     # Our base level command. Due to invoke_without_command=True it means that this command is only run when no
     # sub-command is run. Makes it a command group with a name.
-    @commands.group(name='profile', invoke_without_command = True, aliases = ['p'])
+    @commands.group(name='profile', invoke_without_command = True, aliases = ['p', 'P', 'Profile', 'profile'])
     # Defines it as a function.
     async def profile(self, ctx, *, userName:str = None):
         """
@@ -492,7 +492,7 @@ class Profiles(commands.Cog):
         # Send embed
         await ctx.send(content="Here you go!", embed=embed)
 
-    @profile.group(name = 'options', aliases = ['option', 'o'])
+    @profile.group(name = 'options', aliases = ['option', 'o', 'O'])
     async def pOptions(self, ctx, option:str = None, value:str = None):
         """
         Checks or change profile options.
