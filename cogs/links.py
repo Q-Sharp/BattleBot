@@ -15,7 +15,10 @@ class WikiLinks(commands.Cog):
         """
         Links a specifed page of the wiki.
         """
-        await ctx.send(f"https://battlelegion.wiki/{page}")
+        if page is None:
+            await ctx.send(f"https://www.battlelegion.wiki/")
+        else:
+            await ctx.send(f"https://www.battlelegion.wiki/{page}")
         
 def setup(bot):
     bot.add_cog(WikiLinks(bot))

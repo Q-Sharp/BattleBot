@@ -45,6 +45,8 @@ async def get_page(self, ctx, number, userid):
 
     user = await self.bot.fetch_user(userid)
     player = profiles[str(userid)]
+    rank = player['Level']['rank']
+    title = config.rp_ranktitles[rank]
 
     page = discord.Embed(title = f"{user.display_name}'s profile",
                           colour = int(player['Settings']['colours'][player['Settings']['colour']], 16),
@@ -65,7 +67,7 @@ async def get_page(self, ctx, number, userid):
                         value = f"Account Name: {player['Base']['username']} \nClan: {clan} \nCountry: {player['Base']['country']}",
                         inline = False)
         page.add_field(name = "Level Info",
-                        value = f"Rank: {player['Level']['rank']} \nTotal Rank Points: {player['Level']['rp']}",
+                        value = f"Level: {player['Level']['rank']} \nTotal Experience: {player['Level']['rp']} \nTitle: {title}",
                         inline = False)
 
     if number == 2:
@@ -167,7 +169,7 @@ class Profiles(commands.Cog):
 
     # Our base level command. Due to invoke_without_command=True it means that this command is only run when no
     # sub-command is run. Makes it a command group with a name.
-    @commands.group(name='profile', invoke_without_command = True, aliases = ['p'])
+    @commands.group(name='profile', invoke_without_command = True, aliases = ['p', 'P', 'Profile', 'profile'])
     # Defines it as a function.
     async def profile(self, ctx, *, userName:str = None):
         """
@@ -490,7 +492,7 @@ class Profiles(commands.Cog):
         # Send embed
         await ctx.send(content="Here you go!", embed=embed)
 
-    @profile.group(name = 'options', aliases = ['option', 'o'])
+    @profile.group(name = 'options', aliases = ['option', 'o', 'O'])
     async def pOptions(self, ctx, option:str = None, value:str = None):
         """
         Checks or change profile options.

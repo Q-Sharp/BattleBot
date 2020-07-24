@@ -84,7 +84,7 @@ class Info(commands.Cog):
         embed.add_field(name="Join the Battle Legion Community server to get the latest updates!!",
                         value="https://discord.gg/YahVdmm")
         embed.add_field(name="Check my source code and contribute on Github.",
-                        value="https://github.com/Greenfoot5/BattleBot")
+                        value="https://github.com/Q-Sharp/BattleBot")
 
         await ctx.send(content="",embed=embed)
 
