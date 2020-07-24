@@ -169,7 +169,7 @@ class Profiles(commands.Cog):
 
     # Our base level command. Due to invoke_without_command=True it means that this command is only run when no
     # sub-command is run. Makes it a command group with a name.
-    @commands.group(name='profile', invoke_without_command = True, aliases = ['p', 'P', 'Profile', 'profile'])
+    @commands.group(name='profile', invoke_without_command = True, aliases = ['p', 'P', 'Profile'])
     # Defines it as a function.
     async def profile(self, ctx, *, userName:str = None):
         """
