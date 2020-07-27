@@ -24,7 +24,7 @@ class Responses(commands.Cog):
 You will likely not get support if you do the following:
 • Ask what the best army is in x rank (there is none).
 • Ask for tips with no context.
-• Telling us your stuck, but not actually giving us any info to help you with.
+• Telling us you're stuck, but not actually giving us any info to help you with.
 • Ask us to make you an army.
 We can't help you, if you can't help us.""")
 
