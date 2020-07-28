@@ -31,21 +31,21 @@ rp_ranks = [int(5 * (i ** 1.5) + 50 * i + 100) for i in range(70)]
 
 # ranking range
 rp_ranktitles = RangeKeyDict({
-        (0, 4): "Village",
-        (5, 9): "Battlegrounds",
-        (10, 14): "Bandit Town",
-        (15, 19): "Iron Ramparts",
-        (20, 24): "Soldiers' Encampment,",
-        (25, 29): "Royal Encampment",
-        (30, 34): "Uncharted Jungle",
-        (35, 39): "Sky Temple",
-        (40, 44): "Arcane Desert",
-        (45, 49): "Ancient Tomb",
-        (50, 54): "Eldricht Mountains",
-        (55, 59): "Divine Sanctuary",
-        (60, 64): "Whispering Ruins",
-        (65, 69): "Druidic Forest,",
-        (70, 74): "Valley of Giants"
+        (0, 5): "Village",
+        (5, 10): "Battlegrounds",
+        (10, 15): "Bandit Town",
+        (15, 20): "Iron Ramparts",
+        (20, 25): "Soldiers' Encampment",
+        (25, 30): "Royal Encampment",
+        (30, 35): "Uncharted Jungle",
+        (35, 40): "Sky Temple",
+        (40, 45): "Arcane Desert",
+        (45, 50): "Ancient Tomb",
+        (50, 55): "Eldricht Mountains",
+        (55, 60): "Divine Sanctuary",
+        (60, 65): "Whispering Ruins",
+        (65, 70): "Druidic Forest",
+        (70, 75): "Valley of Giants"
     })
 
 
